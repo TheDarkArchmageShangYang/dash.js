@@ -4,7 +4,7 @@ samples/mpds
 ## Node.js
 #################
 
-node_modules
+# node_modules
 npm-debug.log
 
 #################
@@ -15,7 +15,7 @@ npm-debug.log
 _SpecRunner.html
 reports
 jsdoc
-dist
+# dist
 build/temp
 build/es5
 build/typings

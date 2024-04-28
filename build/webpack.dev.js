@@ -16,7 +16,7 @@ const config = merge(common, {
         static: {
             directory: path.join(__dirname, '../'),
         },
-        open: ['samples/index.html'],
+        open: ['samples/dash-if-reference-player/index.html'],
         hot: true,
         compress: true,
         port: 3000

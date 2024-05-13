@@ -114,6 +114,18 @@ function TestRuleClass() {
         }
     }
 
+    function printData() {
+        let fs = require('fs');
+        const filePath = 'data.txt';
+        
+        let str = '当前已播放' + '1' + '个视频块,总视频质量为' + '0' + '\n';
+        str += '总视频码率切换惩罚为' + '0' + '\n';
+        str += '总缓冲时间为' + '0' + '\n';
+        str += '总QoE为' + '0' + '\n';
+
+        fs.appendFile(filePath, str, (err) => {});
+    }
+
     function calculateTimeForTimeout(timeForPacket, loss, PTO, RTO) {
         let time = 0;
         time += (PTO+timeForPacket)+loss*(2*PTO+timeForPacket);

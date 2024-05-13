@@ -85,7 +85,10 @@ function BufferController(config) {
         initCache,
         pendingPruningRanges,
         replacingBuffer,
-        seekTarget;
+        seekTarget,
+        lastBufferState,
+        lastBufferTime,
+        rebufferTime;
 
 
     function setup() {
@@ -884,6 +887,17 @@ function BufferController(config) {
 
         bufferState = state;
 
+        // 0表示buffer不空,1表示buffer为空
+        if ((lastBufferState == 0) && (bufferState == Events.BUFFER_EMPTY)) {
+            lastBufferState = 1;
+            lastBufferTime = playbackController.getTime() || 0;
+            console.log("this is in BUfferController.js output lastBufferTime:%d", lastBufferTime);
+        }
+        else if ((lastBufferState === 1) && (bufferState === Events.BUFFER_LOADED)) {
+            lastBufferState = 0;
+            rebufferTime += playbackController.getTime() - lastBufferTime;
+        }
+
         _triggerEvent(Events.BUFFER_LEVEL_STATE_CHANGED, { state: state });
         _triggerEvent(state === MetricsConstants.BUFFER_LOADED ? Events.BUFFER_LOADED : Events.BUFFER_EMPTY);
         logger.debug(state === MetricsConstants.BUFFER_LOADED ? 'Got enough buffer to start' : 'Waiting for more buffer before starting playback');
@@ -1108,6 +1122,10 @@ function BufferController(config) {
         return bufferLevel;
     }
 
+    function getRebufferTime() {
+        return rebufferTime;
+    }
+
     function getMediaSource() {
         return mediaSource;
     }
@@ -1211,6 +1229,9 @@ function BufferController(config) {
         pendingPruningRanges = [];
         seekTarget = NaN;
         isPrebuffering = false;
+        lastBufferState = 0;
+        lastBufferTime = 0;
+        rebufferTime = 0;
 
         if (sourceBufferSink) {
             let tmpSourceBufferSinkToReset = sourceBufferSink;
@@ -1251,6 +1272,7 @@ function BufferController(config) {
         dischargePreBuffer,
         getBuffer,
         getBufferLevel,
+        getRebufferTime,
         getRangeAt,
         hasBufferAtTime,
         pruneBuffer,

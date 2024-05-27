@@ -65,6 +65,11 @@ function TestRuleClass() {
         // eventBus.on(Events.BUFFER_LEVEL_STATE_CHANGED, _onBufferLevelStateChanged, instance);
     }
 
+    // function _onBufferLevelStateChanged(e) {
+    //     console.log(e.state);
+    //     console.log('success');
+    // }
+
     function getInitialTestState(rulesContext) {
         const initialState = {};
         const mediaInfo = rulesContext.getMediaInfo();
@@ -119,32 +124,27 @@ function TestRuleClass() {
     }
 
     function printData() {
-        console.log('this is printData');
 
         let fs = require('fs');
-        const filePath = 'D:\test\data.txt';
-        console.log('this is printData');
+        const filePath = 'data.txt';
 
-        // let qualitySum = 0,
-        //     smoothnessDiffs = 0;
+        let qualitySum = 0,
+            smoothnessDiffs = 0;
 
-        // for (let i = 0; i < qualityDict.length; i++) {
-        //     qualitySum += qualityDict[i];
-        //     console.log(qualityDict[i]);
-        // }
+        for (let i = 0; i < qualityDict.length; i++) {
+            qualitySum += qualityDict[i];
+            console.log(qualityDict[i]);
+        }
 
-        // for (let i = 0; i < qualityDict.length - 1; i++) {
-        //     smoothnessDiffs += Math.abs(qualityDict[i+1] - qualityDict[i]);
-        // }
+        for (let i = 0; i < qualityDict.length - 1; i++) {
+            smoothnessDiffs += Math.abs(qualityDict[i+1] - qualityDict[i]);
+        }
 
-        // console.log('当前已缓存%d个视频块,总视频质量为', qualityDict.length, qualitySum);
-        // console.log('总视频码率切换惩罚为%d', smoothnessDiffs);
+        console.log('当前已缓存%d个视频块,总视频质量为', qualityDict.length, qualitySum);
+        console.log('总视频码率切换惩罚为%d', smoothnessDiffs);
         
-        // let str = '当前已缓存' + qualityDict.length + '个视频块,总视频质量为' + qualitySum + '\n';
-        // str += '总视频码率切换惩罚为' + smoothnessDiffs + '\n';
-
-        let str = '111' + '\n';
-        console.log(str);
+        let str = '当前已缓存' + qualityDict.length + '个视频块,总视频质量为' + qualitySum + '\n';
+        str += '总视频码率切换惩罚为' + smoothnessDiffs + '\n';
 
         fs.appendFile(filePath, str, () => {});
     }
@@ -158,17 +158,15 @@ function TestRuleClass() {
         return time;
     }
 
-    function calculate(bandwidth, loss, RTT) {
+    function calculateBlockTimeWithoutBlock(start, bandwidth, loss, RTT, PTO, RTO, bitrate) {
+        // console.log("withoutBlock start:%d bitrate:%d", start, bitrate);
         let blockTime = 0;
         let timeForPacket = MTU / bandwidth;
-
-        let N1 = Math.ceil(65536.0 / MTU);
-        let N2 = Math.floor(131072.0 / MTU);
-        let timeForTwoPartPacket = (N2*(1-loss) + N1*loss*(1-loss)) * timeForPacket;
-
-        let probabilityWithBlock = 0;
+        let N1 = Math.ceil(65536 / MTU);
+        let N2 = Math.floor(131072 / MTU);
+        let timeForTwoPartPacket = N2*(1-loss) * timeForPacket;
+        let probabilityWithoutBlock = 0, probabilityWithBlock = 0;
         let totalTime = 0;
-
         for (let i = 1; i <= N1; i++) {
                 let transmitTime = (i-1)*(1-loss)*timeForPacket;
                 let retransmitTime = transmitTime + RTT + 4*timeForPacket;
@@ -189,15 +187,9 @@ function TestRuleClass() {
                 }
                 totalTime += probabilityForFirstLost * (timeForFirstLost-0.5*RTT+timeForTwoPartPacket) + probabilityForSecondLost * (timeForSecondLost-0.5*RTT+timeForTwoPartPacket);
         }
-
-        return [blockTime, probabilityWithBlock, totalTime];
-    }
-
-    function calculateBlockTimeWithoutBlock(start, bandwidth, loss, RTT, PTO, RTO, bitrate, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock) {
-        let blockTime = blockTimeWithoutBlock;
-        // return blockTime;
-        let N1 = Math.ceil(65536.0 / MTU);
-
+        probabilityWithoutBlock = 1 - probabilityWithBlock;
+        console.log("blockTime:%f", blockTime);
+        return blockTime
         if (start < 0) {
                 start = 0;
         }
@@ -209,24 +201,24 @@ function TestRuleClass() {
                 blockTime += calculateRetransmitTime(start, bandwidth, loss, RTT, PTO, RTO, bitrate);
                 return blockTime;
         }
-        if (1 - blockProbabilityWithoutBlock > 0) {
-            blockTime += (1 - blockProbabilityWithoutBlock) * calculateBlockTimeWithoutBlock(start, bandwidth, loss, RTT, PTO, RTO, bitrate, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock);
-        }
-        if (blockProbabilityWithoutBlock > 0) {
-            blockTime += blockProbabilityWithoutBlock * calculateBlockTimeWithBlock(start, bandwidth, loss, RTT, PTO, RTO, blockTimeWithoutBlock, totalTimeWithoutBlock, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock, bitrate);
+        let blockTimeWithoutBlock = calculateBlockTimeWithoutBlock(start, bandwidth, loss, RTT, PTO, RTO, bitrate);
+        blockTime += probabilityWithoutBlock * blockTimeWithoutBlock;
+        if (probabilityWithBlock > 0) {
+                let blockTimeWithBlock = calculateBlockTimeWithBlock(start, bandwidth, loss, RTT, PTO, RTO, blockTime, totalTime, bitrate);
+                blockTime += probabilityWithBlock * blockTimeWithBlock;
         }
         return blockTime;
     }
 
-    function calculateBlockTimeWithBlock(start, bandwidth, loss, RTT, PTO, RTO, blockTimeLast, totalTimeLast, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock, bitrate) {
+    function calculateBlockTimeWithBlock(start, bandwidth, loss, RTT, PTO, RTO, blockTimeLast, totalTimeLast, bitrate) {
         let blockTime = 0;
         let timeForPacket = MTU / bandwidth;
         let timeForTimeout = calculateTimeForTimeout(timeForPacket, loss, PTO, RTO);
 
         let N1 = 65536 / MTU + 1;
         let N2 = 131072 / MTU;
-        let timeForTwoPartPacket = N2 * (1-loss) * timeForPacket;
-        let probabilityWithBlock = 0;
+        let timeForTwoPartPacket = (N2*(1-loss) + N1*loss*(1-loss)) * timeForPacket;
+        let probabilityWithoutBlock = 0, probabilityWithBlock = 0;
         let totalTime = 0;
 
         let lastStart = start;
@@ -304,21 +296,23 @@ function TestRuleClass() {
                 totalTime += probabilityForSecondLost * (timeForSecondLost-0.5*RTT+timeForTwoPartPacket);
                 
         }
+        probabilityWithoutBlock = 1 - probabilityWithBlock;
 
         if (start + 131072 >= bitrate * videoChunkLength / 8) {
                 blockTime += calculateRetransmitTime(start, bandwidth, loss, RTT, PTO, RTO, bitrate);
                 return blockTime;
         }
-        if (1 - probabilityWithBlock > 0) {
-            blockTime += (1 - probabilityWithBlock) * calculateBlockTimeWithoutBlock(start, bandwidth, loss, RTT, PTO, RTO, bitrate, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock);
-        }
+        let blockTimeWithoutBlock = calculateBlockTimeWithoutBlock(start, bandwidth, loss, RTT, PTO, RTO, bitrate);
+        blockTime += probabilityWithoutBlock * blockTimeWithoutBlock;
         if (probabilityWithBlock > 0) {
-            blockTime += probabilityWithBlock * calculateBlockTimeWithBlock(start, bandwidth, loss, RTT, PTO, RTO, blockTime, totalTime, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock, bitrate);
+                let blockTimeWithBlock = calculateBlockTimeWithBlock(start, bandwidth, loss, RTT, PTO, RTO, blockTime, totalTime, bitrate);
+                blockTime += probabilityWithBlock * blockTimeWithBlock;
         }
         return blockTime;
     }
 
     function calculateRetransmitTime(start, bandwidth, loss, RTT, PTO, RTO, bitrate) {
+        // console.log("retransmitTime start:%d bitrate:%d", start, bitrate);
         let time = 0;
         let timeForPacket = MTU / bandwidth;
         let timeForTimeout = calculateTimeForTimeout(timeForPacket, loss, PTO, RTO);
@@ -350,18 +344,15 @@ function TestRuleClass() {
 
     function calculateDownloadTimeFromParameter(bandwidth, loss, RTT, PTO, RTO, bitrate) {
         bandwidth = bandwidth * 1166 / 1258;
-
         let time = 0;
         time += RTT + bitrate * videoChunkLength / bandwidth;
-
-        if (bitrate * videoChunkLength / 8 <= 131072) {
+        
+        if (bitrate * videoChunkLength / 8 < 131072) {
             time += calculateRetransmitTime(0, bandwidth, loss, RTT, PTO, RTO, bitrate);
             return time;
         }
 
-        let [a, b, c] = calculate(bandwidth, loss, RTT);
-
-        time += calculateBlockTimeWithoutBlock(-1, bandwidth, loss, RTT, PTO, RTO, bitrate, a, b, c);
+        time += calculateBlockTimeWithoutBlock(-1, bandwidth, loss, RTT, PTO, RTO, bitrate);
 
         return time;
     }

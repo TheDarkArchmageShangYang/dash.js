@@ -25357,20 +25357,20 @@ BlackListController.__dashjs_factory_name = 'BlackListController';
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _constants_Constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants/Constants */ "./src/streaming/constants/Constants.js");
-/* harmony import */ var _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../constants/MetricsConstants */ "./src/streaming/constants/MetricsConstants.js");
-/* harmony import */ var _models_FragmentModel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../models/FragmentModel */ "./src/streaming/models/FragmentModel.js");
-/* harmony import */ var _SourceBufferSink__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../SourceBufferSink */ "./src/streaming/SourceBufferSink.js");
-/* harmony import */ var _PreBufferSink__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../PreBufferSink */ "./src/streaming/PreBufferSink.js");
-/* harmony import */ var _core_EventBus__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../core/EventBus */ "./src/core/EventBus.js");
-/* harmony import */ var _core_events_Events__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../core/events/Events */ "./src/core/events/Events.js");
-/* harmony import */ var _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../core/FactoryMaker */ "./src/core/FactoryMaker.js");
-/* harmony import */ var _core_Debug__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../core/Debug */ "./src/core/Debug.js");
-/* harmony import */ var _utils_InitCache__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../utils/InitCache */ "./src/streaming/utils/InitCache.js");
-/* harmony import */ var _vo_DashJSError__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../vo/DashJSError */ "./src/streaming/vo/DashJSError.js");
-/* harmony import */ var _core_errors_Errors__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../core/errors/Errors */ "./src/core/errors/Errors.js");
-/* harmony import */ var _vo_metrics_HTTPRequest__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../vo/metrics/HTTPRequest */ "./src/streaming/vo/metrics/HTTPRequest.js");
-/* harmony import */ var _streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../../streaming/MediaPlayerEvents */ "./src/streaming/MediaPlayerEvents.js");
+/* harmony import */ var _core_Debug__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../core/Debug */ "./src/core/Debug.js");
+/* harmony import */ var _core_EventBus__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../core/EventBus */ "./src/core/EventBus.js");
+/* harmony import */ var _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../core/FactoryMaker */ "./src/core/FactoryMaker.js");
+/* harmony import */ var _core_errors_Errors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../core/errors/Errors */ "./src/core/errors/Errors.js");
+/* harmony import */ var _core_events_Events__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../core/events/Events */ "./src/core/events/Events.js");
+/* harmony import */ var _streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../streaming/MediaPlayerEvents */ "./src/streaming/MediaPlayerEvents.js");
+/* harmony import */ var _PreBufferSink__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../PreBufferSink */ "./src/streaming/PreBufferSink.js");
+/* harmony import */ var _SourceBufferSink__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../SourceBufferSink */ "./src/streaming/SourceBufferSink.js");
+/* harmony import */ var _constants_Constants__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../constants/Constants */ "./src/streaming/constants/Constants.js");
+/* harmony import */ var _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../constants/MetricsConstants */ "./src/streaming/constants/MetricsConstants.js");
+/* harmony import */ var _models_FragmentModel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../models/FragmentModel */ "./src/streaming/models/FragmentModel.js");
+/* harmony import */ var _utils_InitCache__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../utils/InitCache */ "./src/streaming/utils/InitCache.js");
+/* harmony import */ var _vo_DashJSError__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../vo/DashJSError */ "./src/streaming/vo/DashJSError.js");
+/* harmony import */ var _vo_metrics_HTTPRequest__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../vo/metrics/HTTPRequest */ "./src/streaming/vo/metrics/HTTPRequest.js");
 /**
  * The copyright in this software is being made available under the BSD License,
  * included below. This software may be subject to other third party and contributor
@@ -25423,7 +25423,7 @@ var BUFFER_CONTROLLER_TYPE = 'BufferController';
 function BufferController(config) {
   config = config || {};
   var context = this.context;
-  var eventBus = (0,_core_EventBus__WEBPACK_IMPORTED_MODULE_5__["default"])(context).getInstance();
+  var eventBus = (0,_core_EventBus__WEBPACK_IMPORTED_MODULE_1__["default"])(context).getInstance();
   var errHandler = config.errHandler;
   var fragmentModel = config.fragmentModel;
   var representationController = config.representationController;
@@ -25434,11 +25434,11 @@ function BufferController(config) {
   var streamInfo = config.streamInfo;
   var type = config.type;
   var settings = config.settings;
-  var instance, logger, isBufferingCompleted, bufferLevel, criticalBufferLevel, mediaSource, maxAppendedIndex, maximumIndex, sourceBufferSink, dischargeBuffer, isPrebuffering, dischargeFragments, bufferState, appendedBytesInfo, wallclockTicked, isPruningInProgress, isQuotaExceeded, initCache, pendingPruningRanges, replacingBuffer, seekTarget;
+  var instance, logger, isBufferingCompleted, bufferLevel, criticalBufferLevel, mediaSource, maxAppendedIndex, maximumIndex, sourceBufferSink, dischargeBuffer, isPrebuffering, dischargeFragments, bufferState, appendedBytesInfo, wallclockTicked, isPruningInProgress, isQuotaExceeded, initCache, pendingPruningRanges, replacingBuffer, seekTarget, lastBufferState, lastBufferTime, rebufferTime;
 
   function setup() {
-    logger = (0,_core_Debug__WEBPACK_IMPORTED_MODULE_8__["default"])(context).getInstance().getLogger(instance);
-    initCache = (0,_utils_InitCache__WEBPACK_IMPORTED_MODULE_9__["default"])(context).getInstance();
+    logger = (0,_core_Debug__WEBPACK_IMPORTED_MODULE_0__["default"])(context).getInstance().getLogger(instance);
+    initCache = (0,_utils_InitCache__WEBPACK_IMPORTED_MODULE_11__["default"])(context).getInstance();
     resetInitialSettings();
   }
   /**
@@ -25449,14 +25449,14 @@ function BufferController(config) {
 
   function initialize(mediaSource) {
     setMediaSource(mediaSource);
-    eventBus.on(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].INIT_FRAGMENT_LOADED, _onInitFragmentLoaded, instance);
-    eventBus.on(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].MEDIA_FRAGMENT_LOADED, _onMediaFragmentLoaded, instance);
-    eventBus.on(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].WALLCLOCK_TIME_UPDATED, _onWallclockTimeUpdated, instance);
-    eventBus.on(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_13__["default"].PLAYBACK_PLAYING, _onPlaybackPlaying, instance);
-    eventBus.on(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_13__["default"].PLAYBACK_PROGRESS, _onPlaybackProgression, instance);
-    eventBus.on(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_13__["default"].PLAYBACK_TIME_UPDATED, _onPlaybackProgression, instance);
-    eventBus.on(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_13__["default"].PLAYBACK_RATE_CHANGED, _onPlaybackRateChanged, instance);
-    eventBus.on(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_13__["default"].PLAYBACK_STALLED, _onPlaybackStalled, instance);
+    eventBus.on(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].INIT_FRAGMENT_LOADED, _onInitFragmentLoaded, instance);
+    eventBus.on(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].MEDIA_FRAGMENT_LOADED, _onMediaFragmentLoaded, instance);
+    eventBus.on(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].WALLCLOCK_TIME_UPDATED, _onWallclockTimeUpdated, instance);
+    eventBus.on(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_5__["default"].PLAYBACK_PLAYING, _onPlaybackPlaying, instance);
+    eventBus.on(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_5__["default"].PLAYBACK_PROGRESS, _onPlaybackProgression, instance);
+    eventBus.on(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_5__["default"].PLAYBACK_TIME_UPDATED, _onPlaybackProgression, instance);
+    eventBus.on(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_5__["default"].PLAYBACK_RATE_CHANGED, _onPlaybackRateChanged, instance);
+    eventBus.on(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_5__["default"].PLAYBACK_STALLED, _onPlaybackStalled, instance);
   }
   /**
    * Returns the stream id
@@ -25561,7 +25561,7 @@ function BufferController(config) {
 
     return new Promise(function (resolve, reject) {
       var requiredQuality = abrController.getQualityFor(type, streamInfo.id);
-      sourceBufferSink = (0,_PreBufferSink__WEBPACK_IMPORTED_MODULE_4__["default"])(context).create(_onAppended.bind(_this));
+      sourceBufferSink = (0,_PreBufferSink__WEBPACK_IMPORTED_MODULE_6__["default"])(context).create(_onAppended.bind(_this));
       updateBufferTimestampOffset(_getRepresentationInfo(requiredQuality)).then(function () {
         resolve(sourceBufferSink);
       })["catch"](function () {
@@ -25573,7 +25573,7 @@ function BufferController(config) {
   function _initializeSinkForMseBuffering(mediaInfo, oldBufferSinks) {
     return new Promise(function (resolve, reject) {
       var requiredQuality = abrController.getQualityFor(type, streamInfo.id);
-      sourceBufferSink = (0,_SourceBufferSink__WEBPACK_IMPORTED_MODULE_3__["default"])(context).create({
+      sourceBufferSink = (0,_SourceBufferSink__WEBPACK_IMPORTED_MODULE_7__["default"])(context).create({
         mediaSource: mediaSource,
         textController: textController,
         eventBus: eventBus
@@ -25585,7 +25585,7 @@ function BufferController(config) {
         resolve(sourceBufferSink);
       })["catch"](function (e) {
         logger.fatal('Caught error on create SourceBuffer: ' + e);
-        errHandler.error(new _vo_DashJSError__WEBPACK_IMPORTED_MODULE_10__["default"](_core_errors_Errors__WEBPACK_IMPORTED_MODULE_11__["default"].MEDIASOURCE_TYPE_UNSUPPORTED_CODE, _core_errors_Errors__WEBPACK_IMPORTED_MODULE_11__["default"].MEDIASOURCE_TYPE_UNSUPPORTED_MESSAGE + type));
+        errHandler.error(new _vo_DashJSError__WEBPACK_IMPORTED_MODULE_12__["default"](_core_errors_Errors__WEBPACK_IMPORTED_MODULE_3__["default"].MEDIASOURCE_TYPE_UNSUPPORTED_CODE, _core_errors_Errors__WEBPACK_IMPORTED_MODULE_3__["default"].MEDIASOURCE_TYPE_UNSUPPORTED_MESSAGE + type));
         reject(e);
       });
     });
@@ -25594,7 +25594,7 @@ function BufferController(config) {
   function _initializeSink(mediaInfo, oldBufferSinks, requiredQuality) {
     var selectedRepresentation = _getRepresentationInfo(requiredQuality);
 
-    if (oldBufferSinks && oldBufferSinks[type] && (type === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].VIDEO || type === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].AUDIO)) {
+    if (oldBufferSinks && oldBufferSinks[type] && (type === _constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].VIDEO || type === _constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].AUDIO)) {
       return sourceBufferSink.initializeForStreamSwitch(mediaInfo, selectedRepresentation, oldBufferSinks[type]);
     } else {
       return sourceBufferSink.initializeForFirstUse(streamInfo, mediaInfo, selectedRepresentation);
@@ -25625,7 +25625,7 @@ function BufferController(config) {
       for (var j = 0; j < chunks.length; j++) {
         var chunk = chunks[j];
 
-        if (chunk.segmentType !== _vo_metrics_HTTPRequest__WEBPACK_IMPORTED_MODULE_12__.HTTPRequest.INIT_SEGMENT_TYPE) {
+        if (chunk.segmentType !== _vo_metrics_HTTPRequest__WEBPACK_IMPORTED_MODULE_13__.HTTPRequest.INIT_SEGMENT_TYPE) {
           var initChunk = initCache.extract(chunk.streamId, chunk.representationId);
 
           if (initChunk) {
@@ -25715,8 +25715,8 @@ function BufferController(config) {
       _onAppended(e);
     });
 
-    if (chunk.mediaInfo.type === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].VIDEO) {
-      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].VIDEO_CHUNK_RECEIVED, {
+    if (chunk.mediaInfo.type === _constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].VIDEO) {
+      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].VIDEO_CHUNK_RECEIVED, {
         chunk: chunk
       });
     }
@@ -25740,7 +25740,7 @@ function BufferController(config) {
       if (e.error.code === QUOTA_EXCEEDED_ERROR_CODE || !hasEnoughSpaceToAppend()) {
         logger.warn('Clearing playback buffer to overcome quota exceed situation'); // Notify ScheduleController to stop scheduling until buffer has been pruned
 
-        _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].QUOTA_EXCEEDED, {
+        _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].QUOTA_EXCEEDED, {
           criticalBufferLevel: criticalBufferLevel,
           quotaExceededTime: e.chunk.start
         });
@@ -25771,7 +25771,7 @@ function BufferController(config) {
 
     var ranges = sourceBufferSink.getAllBufferRanges();
 
-    if (appendedBytesInfo.segmentType === _vo_metrics_HTTPRequest__WEBPACK_IMPORTED_MODULE_12__.HTTPRequest.MEDIA_SEGMENT_TYPE) {
+    if (appendedBytesInfo.segmentType === _vo_metrics_HTTPRequest__WEBPACK_IMPORTED_MODULE_13__.HTTPRequest.MEDIA_SEGMENT_TYPE) {
       _showBufferRanges(ranges);
 
       _onPlaybackProgression();
@@ -25790,7 +25790,7 @@ function BufferController(config) {
     }
 
     if (appendedBytesInfo && !suppressAppendedEvent) {
-      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].BYTES_APPENDED_END_FRAGMENT, {
+      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BYTES_APPENDED_END_FRAGMENT, {
         quality: appendedBytesInfo.quality,
         startTime: appendedBytesInfo.start,
         index: appendedBytesInfo.index,
@@ -25810,7 +25810,7 @@ function BufferController(config) {
   function _adjustSeekTarget() {
     if (isNaN(seekTarget) || isPrebuffering) return; // Check buffered data only for audio and video
 
-    if (type !== _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].AUDIO && type !== _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].VIDEO) {
+    if (type !== _constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].AUDIO && type !== _constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].VIDEO) {
       seekTarget = NaN;
       return;
     } // Check if current buffered range already contains seek target (and current video element time)
@@ -25996,7 +25996,7 @@ function BufferController(config) {
       var rangeEnd = Math.max(0, targetTime - bufferToKeepBehind); // Ensure we keep full range of current fragment
 
       var currentTimeRequest = fragmentModel.getRequests({
-        state: _models_FragmentModel__WEBPACK_IMPORTED_MODULE_2__["default"].FRAGMENT_MODEL_EXECUTED,
+        state: _models_FragmentModel__WEBPACK_IMPORTED_MODULE_10__["default"].FRAGMENT_MODEL_EXECUTED,
         time: targetTime,
         threshold: BUFFER_RANGE_CALCULATION_THRESHOLD
       })[0];
@@ -26035,7 +26035,7 @@ function BufferController(config) {
 
 
     var currentTimeRequest = fragmentModel.getRequests({
-      state: _models_FragmentModel__WEBPACK_IMPORTED_MODULE_2__["default"].FRAGMENT_MODEL_EXECUTED,
+      state: _models_FragmentModel__WEBPACK_IMPORTED_MODULE_10__["default"].FRAGMENT_MODEL_EXECUTED,
       time: targetTime,
       threshold: BUFFER_RANGE_CALCULATION_THRESHOLD
     })[0];
@@ -26075,7 +26075,7 @@ function BufferController(config) {
   }
 
   function _onPlaybackProgression() {
-    if (!replacingBuffer || type === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT && textController.isTextEnabled()) {
+    if (!replacingBuffer || type === _constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].TEXT && textController.isTextEnabled()) {
       _updateBufferLevel();
     }
   }
@@ -26200,7 +26200,7 @@ function BufferController(config) {
       var tolerance = settings.get().streaming.gaps.jumpGaps && !isNaN(settings.get().streaming.gaps.smallGapLimit) ? settings.get().streaming.gaps.smallGapLimit : NaN;
       bufferLevel = Math.max(getBufferLength(referenceTime, tolerance), 0);
 
-      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].BUFFER_LEVEL_UPDATED, {
+      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_LEVEL_UPDATED, {
         mediaType: type,
         bufferLevel: bufferLevel
       });
@@ -26223,40 +26223,51 @@ function BufferController(config) {
 
   function checkIfSufficientBuffer() {
     // No need to check buffer if type is not audio or video (for example if several errors occur during text parsing, so that the buffer cannot be filled, no error must occur on video playback)
-    if (type !== _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].AUDIO && type !== _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].VIDEO) return; // When the player is working in low latency mode, the buffer is often below STALL_THRESHOLD.
+    if (type !== _constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].AUDIO && type !== _constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].VIDEO) return; // When the player is working in low latency mode, the buffer is often below STALL_THRESHOLD.
     // So, when in low latency mode, change dash.js behavior so it notifies a stall just when
     // buffer reach 0 seconds
 
     if ((!playbackController.getLowLatencyModeEnabled() && bufferLevel < settings.get().streaming.buffer.stallThreshold || bufferLevel === 0) && !isBufferingCompleted) {
-      _notifyBufferStateChanged(_constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_1__["default"].BUFFER_EMPTY);
+      _notifyBufferStateChanged(_constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_9__["default"].BUFFER_EMPTY);
     } else {
       if (isBufferingCompleted || bufferLevel >= settings.get().streaming.buffer.stallThreshold || playbackController.getLowLatencyModeEnabled() && bufferLevel > 0) {
-        _notifyBufferStateChanged(_constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_1__["default"].BUFFER_LOADED);
+        _notifyBufferStateChanged(_constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_9__["default"].BUFFER_LOADED);
       }
     }
   }
 
   function _notifyBufferStateChanged(state) {
-    if (bufferState === state || state === _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_1__["default"].BUFFER_EMPTY && playbackController.getTime() === 0 || // Don't trigger BUFFER_EMPTY if it's initial loading
-    type === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT && !textController.isTextEnabled()) {
+    if (bufferState === state || state === _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_9__["default"].BUFFER_EMPTY && playbackController.getTime() === 0 || // Don't trigger BUFFER_EMPTY if it's initial loading
+    type === _constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].TEXT && !textController.isTextEnabled()) {
       return;
     }
 
-    bufferState = state;
+    bufferState = state; // 0表示buffer不空,1表示buffer为空
 
-    _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].BUFFER_LEVEL_STATE_CHANGED, {
+    if (lastBufferState == 0 && bufferState == _core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_EMPTY) {
+      lastBufferState = 1;
+      lastBufferTime = playbackController.getTime() || 0;
+      console.log('this is in BUfferController.js output lastBufferTime:%d', lastBufferTime);
+    } else if (lastBufferState === 1 && bufferState === _core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_LOADED) {
+      lastBufferState = 0;
+      rebufferTime += playbackController.getTime() - lastBufferTime;
+    }
+
+    console.log('rebufferTime:%f', rebufferTime);
+
+    _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_LEVEL_STATE_CHANGED, {
       state: state
     });
 
-    _triggerEvent(state === _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_1__["default"].BUFFER_LOADED ? _core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].BUFFER_LOADED : _core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].BUFFER_EMPTY);
+    _triggerEvent(state === _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_9__["default"].BUFFER_LOADED ? _core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_LOADED : _core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_EMPTY);
 
-    logger.debug(state === _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_1__["default"].BUFFER_LOADED ? 'Got enough buffer to start' : 'Waiting for more buffer before starting playback');
+    logger.debug(state === _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_9__["default"].BUFFER_LOADED ? 'Got enough buffer to start' : 'Waiting for more buffer before starting playback');
   }
   /* prune buffer on our own in background to avoid browsers pruning buffer silently */
 
 
   function pruneBuffer() {
-    if (!sourceBufferSink || type === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT) {
+    if (!sourceBufferSink || type === _constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].TEXT) {
       return;
     }
 
@@ -26276,7 +26287,7 @@ function BufferController(config) {
     var currentTime = playbackController.getTime();
     var startRangeToKeep = Math.max(0, currentTime - settings.get().streaming.buffer.bufferToKeep);
     var currentTimeRequest = fragmentModel.getRequests({
-      state: _models_FragmentModel__WEBPACK_IMPORTED_MODULE_2__["default"].FRAGMENT_MODEL_EXECUTED,
+      state: _models_FragmentModel__WEBPACK_IMPORTED_MODULE_10__["default"].FRAGMENT_MODEL_EXECUTED,
       time: currentTime,
       threshold: BUFFER_RANGE_CALCULATION_THRESHOLD
     })[0]; // Ensure we keep full range of current fragment
@@ -26397,7 +26408,7 @@ function BufferController(config) {
     if (e.unintended) {
       logger.warn('Detected unintended removal from:', e.from, 'to', e.to, 'setting streamprocessor time to', e.from);
 
-      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].SEEK_TARGET, {
+      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].SEEK_TARGET, {
         time: e.from
       });
     }
@@ -26411,7 +26422,7 @@ function BufferController(config) {
         replacingBuffer = false;
       }
 
-      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].BUFFER_CLEARED, {
+      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_CLEARED, {
         from: e.from,
         to: e.to,
         unintended: e.unintended,
@@ -26476,6 +26487,10 @@ function BufferController(config) {
     return bufferLevel;
   }
 
+  function getRebufferTime() {
+    return rebufferTime;
+  }
+
   function getMediaSource() {
     return mediaSource;
   }
@@ -26488,7 +26503,7 @@ function BufferController(config) {
     isBufferingCompleted = value;
 
     if (isBufferingCompleted) {
-      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].BUFFERING_COMPLETED);
+      _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFERING_COMPLETED);
     } else {
       maximumIndex = Number.POSITIVE_INFINITY;
     }
@@ -26578,6 +26593,9 @@ function BufferController(config) {
     pendingPruningRanges = [];
     seekTarget = NaN;
     isPrebuffering = false;
+    lastBufferState = 0;
+    lastBufferTime = 0;
+    rebufferTime = 0;
 
     if (sourceBufferSink) {
       var tmpSourceBufferSinkToReset = sourceBufferSink;
@@ -26595,14 +26613,14 @@ function BufferController(config) {
   }
 
   function reset(errored, keepBuffers) {
-    eventBus.off(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].INIT_FRAGMENT_LOADED, _onInitFragmentLoaded, this);
-    eventBus.off(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].MEDIA_FRAGMENT_LOADED, _onMediaFragmentLoaded, this);
-    eventBus.off(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].WALLCLOCK_TIME_UPDATED, _onWallclockTimeUpdated, this);
-    eventBus.off(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_13__["default"].PLAYBACK_PLAYING, _onPlaybackPlaying, this);
-    eventBus.off(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_13__["default"].PLAYBACK_PROGRESS, _onPlaybackProgression, this);
-    eventBus.off(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_13__["default"].PLAYBACK_TIME_UPDATED, _onPlaybackProgression, this);
-    eventBus.off(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_13__["default"].PLAYBACK_RATE_CHANGED, _onPlaybackRateChanged, this);
-    eventBus.off(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_13__["default"].PLAYBACK_STALLED, _onPlaybackStalled, this);
+    eventBus.off(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].INIT_FRAGMENT_LOADED, _onInitFragmentLoaded, this);
+    eventBus.off(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].MEDIA_FRAGMENT_LOADED, _onMediaFragmentLoaded, this);
+    eventBus.off(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].WALLCLOCK_TIME_UPDATED, _onWallclockTimeUpdated, this);
+    eventBus.off(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_5__["default"].PLAYBACK_PLAYING, _onPlaybackPlaying, this);
+    eventBus.off(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_5__["default"].PLAYBACK_PROGRESS, _onPlaybackProgression, this);
+    eventBus.off(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_5__["default"].PLAYBACK_TIME_UPDATED, _onPlaybackProgression, this);
+    eventBus.off(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_5__["default"].PLAYBACK_RATE_CHANGED, _onPlaybackRateChanged, this);
+    eventBus.off(_streaming_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_5__["default"].PLAYBACK_STALLED, _onPlaybackStalled, this);
     resetInitialSettings(errored, keepBuffers);
   }
 
@@ -26615,6 +26633,7 @@ function BufferController(config) {
     dischargePreBuffer: dischargePreBuffer,
     getBuffer: getBuffer,
     getBufferLevel: getBufferLevel,
+    getRebufferTime: getRebufferTime,
     getRangeAt: getRangeAt,
     hasBufferAtTime: hasBufferAtTime,
     pruneBuffer: pruneBuffer,
@@ -26643,7 +26662,7 @@ function BufferController(config) {
 }
 
 BufferController.__dashjs_factory_name = BUFFER_CONTROLLER_TYPE;
-/* harmony default export */ __webpack_exports__["default"] = (_core_FactoryMaker__WEBPACK_IMPORTED_MODULE_7__["default"].getClassFactory(BufferController));
+/* harmony default export */ __webpack_exports__["default"] = (_core_FactoryMaker__WEBPACK_IMPORTED_MODULE_2__["default"].getClassFactory(BufferController));
 
 /***/ }),
 

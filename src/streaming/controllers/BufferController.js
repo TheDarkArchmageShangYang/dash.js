@@ -85,10 +85,7 @@ function BufferController(config) {
         initCache,
         pendingPruningRanges,
         replacingBuffer,
-        seekTarget,
-        lastBufferState,
-        lastBufferTime,
-        rebufferTime;
+        seekTarget;
 
 
     function setup() {
@@ -865,7 +862,7 @@ function BufferController(config) {
     function checkIfSufficientBuffer() {
         // No need to check buffer if type is not audio or video (for example if several errors occur during text parsing, so that the buffer cannot be filled, no error must occur on video playback)
         if (type !== Constants.AUDIO && type !== Constants.VIDEO) return;
-        // console.log('bufferLevel1:%f', bufferLevel);
+
         // When the player is working in low latency mode, the buffer is often below STALL_THRESHOLD.
         // So, when in low latency mode, change dash.js behavior so it notifies a stall just when
         // buffer reach 0 seconds
@@ -886,20 +883,6 @@ function BufferController(config) {
         }
 
         bufferState = state;
-        
-        // console.log('rebufferTime2:%f', rebufferTime);
-        // 0表示buffer不空,1表示buffer为空
-        if ((lastBufferState == 0) && (bufferState == Events.BUFFER_EMPTY)) {
-            lastBufferState = 1;
-            lastBufferTime = playbackController.getTime() || 0;
-            console.log('this is in BUfferController.js output lastBufferTime:%d', lastBufferTime);
-        }
-        else if ((lastBufferState === 1) && (bufferState === Events.BUFFER_LOADED)) {
-            lastBufferState = 0;
-            rebufferTime += playbackController.getTime() - lastBufferTime;
-        }
-
-        // console.log('rebufferTime2:%f', rebufferTime);
 
         _triggerEvent(Events.BUFFER_LEVEL_STATE_CHANGED, { state: state });
         _triggerEvent(state === MetricsConstants.BUFFER_LOADED ? Events.BUFFER_LOADED : Events.BUFFER_EMPTY);
@@ -1125,10 +1108,6 @@ function BufferController(config) {
         return bufferLevel;
     }
 
-    function getRebufferTime() {
-        return rebufferTime;
-    }
-
     function getMediaSource() {
         return mediaSource;
     }
@@ -1232,9 +1211,6 @@ function BufferController(config) {
         pendingPruningRanges = [];
         seekTarget = NaN;
         isPrebuffering = false;
-        lastBufferState = 0;
-        lastBufferTime = 0;
-        rebufferTime = 0;
 
         if (sourceBufferSink) {
             let tmpSourceBufferSinkToReset = sourceBufferSink;
@@ -1275,7 +1251,6 @@ function BufferController(config) {
         dischargePreBuffer,
         getBuffer,
         getBufferLevel,
-        getRebufferTime,
         getRangeAt,
         hasBufferAtTime,
         pruneBuffer,

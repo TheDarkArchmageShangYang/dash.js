@@ -35,7 +35,8 @@ angular.module('DashIFTestVectorsService', ['ngResource']).factory('dashifTestVe
 
 app.controller('DashController', ['$scope', '$window', 'sources', 'contributors', 'dashifTestVectors', function ($scope, $window, sources, contributors, dashifTestVectors) {
     $scope.selectedItem = {
-        url: 'https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd'
+        // url: 'https://udpcc-shh.dfshan.net:8000/dash.js/video1/manifest.mpd'
+        url: 'https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd'
     };
 
     sources.query(function (data) {
@@ -339,6 +340,13 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.isCasting = false;
     $scope.castPlayerState = 'IDLE';
 
+    $scope.rebufferTime = 0;
+    $scope.lastBufferEmpty = false;
+    $scope.lastBufferEmptyTime = 0;
+    $scope.qualitySum = 0;
+    $scope.smoothness = 0;
+    $scope.lastQuality = 0;
+
     ////////////////////////////////////////
     //
     // Player Setup
@@ -489,6 +497,36 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             if (!existingViolation || existingViolation.length === 0) {
                 $scope.conformanceViolations.push(e);
             }
+        }
+    }, $scope);
+
+    $scope.player.on(dashjs.MediaPlayer.events.BUFFER_EMPTY, function (e) { /* jshint ignore:line */
+        console.log("BUFFER_EMPTY");
+        if ($scope.lastBufferEmpty == false) {
+            $scope.lastBufferEmpty = true;
+            var now = new Date().getTime() / 1000;
+            $scope.lastBufferEmptyTime = now;
+        }
+    }, $scope);
+
+    $scope.player.on(dashjs.MediaPlayer.events.BUFFER_LOADED, function (e) { /* jshint ignore:line */
+        console.log("BUFFER_LOADED", $scope.lastBufferEmpty);
+        if ($scope.lastBufferEmpty == true) {
+            var now = new Date().getTime() / 1000;
+            $scope.rebufferTime += now - $scope.lastBufferEmptyTime;
+            $scope.lastBufferEmpty = false;
+            console.log("rebufferTime: %f", $scope.rebufferTime);
+        }
+        console.log('quailtySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness, 'QoE:', $scope.qualitySum - $scope.smoothness - 1.85 * $scope.rebufferTime);
+    }, $scope);
+
+    $scope.player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, function (e) { /* jshint ignore:line */
+        if (e.request.mediaType == 'video') {
+            $scope.qualitySum += e.request.quality;
+            $scope.smoothness += Math.abs(e.request.quality - $scope.lastQuality);
+            $scope.lastQuality = e.request.quality;
+            console.log('new chunk quality:', e.request.quality, 'quailtySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness);
+            console.log('QoE:', $scope.qualitySum - $scope.smoothness - 1.85 * $scope.rebufferTime);
         }
     }, $scope);
 

@@ -25141,7 +25141,7 @@ function BufferController(config) {
   var streamInfo = config.streamInfo;
   var type = config.type;
   var settings = config.settings;
-  var instance, logger, isBufferingCompleted, bufferLevel, criticalBufferLevel, mediaSource, maxAppendedIndex, maximumIndex, sourceBufferSink, dischargeBuffer, isPrebuffering, dischargeFragments, bufferState, appendedBytesInfo, wallclockTicked, isPruningInProgress, isQuotaExceeded, initCache, pendingPruningRanges, replacingBuffer, seekTarget, lastBufferState, lastBufferTime, rebufferTime;
+  var instance, logger, isBufferingCompleted, bufferLevel, criticalBufferLevel, mediaSource, maxAppendedIndex, maximumIndex, sourceBufferSink, dischargeBuffer, isPrebuffering, dischargeFragments, bufferState, appendedBytesInfo, wallclockTicked, isPruningInProgress, isQuotaExceeded, initCache, pendingPruningRanges, replacingBuffer, seekTarget;
 
   function setup() {
     logger = (0,_core_Debug__WEBPACK_IMPORTED_MODULE_0__["default"])(context).getInstance().getLogger(instance);
@@ -25949,18 +25949,7 @@ function BufferController(config) {
       return;
     }
 
-    bufferState = state; // 0表示buffer不空,1表示buffer为空
-
-    if (lastBufferState == 0 && bufferState == _core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_EMPTY) {
-      lastBufferState = 1;
-      lastBufferTime = playbackController.getTime() || 0;
-      console.log('this is in BUfferController.js output lastBufferTime:%d', lastBufferTime);
-    } else if (lastBufferState === 1 && bufferState === _core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_LOADED) {
-      lastBufferState = 0;
-      rebufferTime += playbackController.getTime() - lastBufferTime;
-    }
-
-    console.log('rebufferTime:%f', rebufferTime);
+    bufferState = state;
 
     _triggerEvent(_core_events_Events__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_LEVEL_STATE_CHANGED, {
       state: state
@@ -26194,10 +26183,6 @@ function BufferController(config) {
     return bufferLevel;
   }
 
-  function getRebufferTime() {
-    return rebufferTime;
-  }
-
   function getMediaSource() {
     return mediaSource;
   }
@@ -26300,9 +26285,6 @@ function BufferController(config) {
     pendingPruningRanges = [];
     seekTarget = NaN;
     isPrebuffering = false;
-    lastBufferState = 0;
-    lastBufferTime = 0;
-    rebufferTime = 0;
 
     if (sourceBufferSink) {
       var tmpSourceBufferSinkToReset = sourceBufferSink;
@@ -26340,7 +26322,6 @@ function BufferController(config) {
     dischargePreBuffer: dischargePreBuffer,
     getBuffer: getBuffer,
     getBufferLevel: getBufferLevel,
-    getRebufferTime: getRebufferTime,
     getRangeAt: getRangeAt,
     hasBufferAtTime: hasBufferAtTime,
     pruneBuffer: pruneBuffer,

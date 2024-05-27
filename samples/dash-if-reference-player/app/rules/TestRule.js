@@ -61,14 +61,14 @@ function TestRuleClass() {
     function setup() {
         logger = Debug(context).getInstance().getLogger(instance);
         resetInitialSettings();
-
-        // eventBus.on(Events.BUFFER_LEVEL_STATE_CHANGED, _onBufferLevelStateChanged, instance);
     }
 
     function getInitialTestState(rulesContext) {
         const initialState = {};
         const mediaInfo = rulesContext.getMediaInfo();
-        const bitrates = mediaInfo.bitrateList.map(b => b.bandwidth);
+        // const bitrates = mediaInfo.bitrateList.map(b => b.bandwidth);
+        const bitrates = [1,3,4,5,6];
+        // const bitrates = [8];
 
         if (bitrates.length == 1) {
             initialState.state = TEST_STATE_ONE_BITRATE;
@@ -112,41 +112,10 @@ function TestRuleClass() {
         //     getChunkBitrateSequenceOptions(TestState, horizon, newArray);
         // }
 
-        for (let i = 0; i < 5; i++) {
-            const newArray = [...currentArray, i];
+        for (let i = 0; i < TestState.bitrates.length; i++) {
+            const newArray = [...currentArray, TestState.bitrates[i]];
             getChunkBitrateSequenceOptions(TestState, horizon, newArray);
         }
-    }
-
-    function printData() {
-        console.log('this is printData');
-
-        let fs = require('fs');
-        const filePath = 'D:\test\data.txt';
-        console.log('this is printData');
-
-        // let qualitySum = 0,
-        //     smoothnessDiffs = 0;
-
-        // for (let i = 0; i < qualityDict.length; i++) {
-        //     qualitySum += qualityDict[i];
-        //     console.log(qualityDict[i]);
-        // }
-
-        // for (let i = 0; i < qualityDict.length - 1; i++) {
-        //     smoothnessDiffs += Math.abs(qualityDict[i+1] - qualityDict[i]);
-        // }
-
-        // console.log('当前已缓存%d个视频块,总视频质量为', qualityDict.length, qualitySum);
-        // console.log('总视频码率切换惩罚为%d', smoothnessDiffs);
-        
-        // let str = '当前已缓存' + qualityDict.length + '个视频块,总视频质量为' + qualitySum + '\n';
-        // str += '总视频码率切换惩罚为' + smoothnessDiffs + '\n';
-
-        let str = '111' + '\n';
-        console.log(str);
-
-        fs.appendFile(filePath, str, () => {});
     }
 
     function calculateTimeForTimeout(timeForPacket, loss, PTO, RTO) {
@@ -497,7 +466,6 @@ function TestRuleClass() {
                 switchRequest.reason.latency = latency;
                 TestState.state = TEST_STATE_STARTUP;
         }
-        // printData();
         return switchRequest;
     }
 
@@ -507,8 +475,6 @@ function TestRuleClass() {
 
     function reset() {
         resetInitialSettings();
-
-        // eventBus.on(Events.BUFFER_LEVEL_STATE_CHANGED, _onBufferLevelStateChanged, instance);
     }
 
     instance = {

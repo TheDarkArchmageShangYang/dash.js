@@ -35,8 +35,8 @@ angular.module('DashIFTestVectorsService', ['ngResource']).factory('dashifTestVe
 
 app.controller('DashController', ['$scope', '$window', 'sources', 'contributors', 'dashifTestVectors', function ($scope, $window, sources, contributors, dashifTestVectors) {
     $scope.selectedItem = {
-        // url: 'https://udpcc-shh.dfshan.net:8000/video1/manifest.mpd'
-        url: 'https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd'
+        url: 'https://udpcc-shh.dfshan.net:8000/video1/manifest.mpd'
+        // url: 'https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd'
     };
 
     sources.query(function (data) {
@@ -356,43 +356,6 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.video = document.querySelector('.dash-video-player video');
     // store a ref in window.player to provide an easy way to play with dash.js API
     window.player = $scope.player = dashjs.MediaPlayer().create(); /* jshint ignore:line */
-
-    window.player.extend("RequestModifier", function () {
-        return {
-            modifyRequest: function (request) {
-                var url = new URL(request.url);
-                if (/\.mpd$/.test(url.pathname)) {
-                    return;
-                }
-                return;
-                // fetch('https://udpcc-shh.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
-                //     .then(function(response) {
-                //         // 修改后的请求成功处理
-                //         console.log('Modified request successful:', response);
-                //     });
-
-                // return Promise.all([
-                //     fetch(request.url)
-                //         .then(function(response) {
-                //             console.log('origin request successful:', response);
-                //         }),
-                //     fetch('https://udpcc-shh.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
-                //         .then(function(response) {
-                //             console.log('Modified request successful:', response);
-                //         })
-                // ]);
-                // let sleep = function(ms){
-                //     const endTime = Date.now()+ms;
-                //     while(Date.now() <= endTime){}
-                // }
-                // return fetch(request.url)
-                //     .then(function (response) {
-                //         console.log('origin request successful:', response);
-                //         sleep(10000)
-                //     });
-            },
-        };
-    });
 
     const defaultSettings = JSON.parse(JSON.stringify($scope.player.getSettings()));
 

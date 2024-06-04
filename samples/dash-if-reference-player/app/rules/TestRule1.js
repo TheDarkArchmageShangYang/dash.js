@@ -103,7 +103,7 @@ function TestRuleClass() {
     }
 
     function updateMetrics() {
-        fetch('https://time.akamai.com')
+        fetch('https://udpcc-shh.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
             .then(function(response) {
                 return response.text();
             })

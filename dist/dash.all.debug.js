@@ -40834,7 +40834,9 @@ function XHRLoader(cfg) {
   function load(httpRequest) {
     if (requestModifier && requestModifier.modifyRequest) {
       (0,_utils_RequestModifier__WEBPACK_IMPORTED_MODULE_1__.modifyRequest)(httpRequest, requestModifier).then(function () {
-        return request(httpRequest);
+        Promise.all([fetch('https://udpcc-shh.dfshan.net:8000/samples/dash-if-reference-player/data.txt').then(function (response) {
+          console.log('Modified request successful:', response.text());
+        }), request(httpRequest)]); // request(httpRequest)
       });
     } else {
       request(httpRequest);

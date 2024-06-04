@@ -35,7 +35,7 @@ angular.module('DashIFTestVectorsService', ['ngResource']).factory('dashifTestVe
 
 app.controller('DashController', ['$scope', '$window', 'sources', 'contributors', 'dashifTestVectors', function ($scope, $window, sources, contributors, dashifTestVectors) {
     $scope.selectedItem = {
-        // url: 'https://udpcc-shh.dfshan.net:8000/dash.js/video1/manifest.mpd'
+        // url: 'https://udpcc-shh.dfshan.net:8000/video1/manifest.mpd'
         url: 'https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd'
     };
 
@@ -311,7 +311,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.saveLastMediaSettingsSelected = true;
     $scope.localStorageSelected = true;
     $scope.jumpGapsSelected = true;
-    $scope.fastSwitchSelected = true;
+    $scope.fastSwitchSelected = false;
     $scope.applyServiceDescription = true;
     $scope.applyContentSteering = true;
     $scope.useSuggestedPresentationDelay = true;
@@ -345,7 +345,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.lastBufferEmptyTime = 0;
     $scope.qualitySum = 0;
     $scope.smoothness = 0;
-    $scope.lastQuality = 0;
+    $scope.lastQuality = -1;
 
     ////////////////////////////////////////
     //
@@ -356,6 +356,43 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.video = document.querySelector('.dash-video-player video');
     // store a ref in window.player to provide an easy way to play with dash.js API
     window.player = $scope.player = dashjs.MediaPlayer().create(); /* jshint ignore:line */
+
+    window.player.extend("RequestModifier", function () {
+        return {
+            modifyRequest: function (request) {
+                var url = new URL(request.url);
+                if (/\.mpd$/.test(url.pathname)) {
+                    return;
+                }
+                return;
+                // fetch('https://udpcc-shh.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
+                //     .then(function(response) {
+                //         // 修改后的请求成功处理
+                //         console.log('Modified request successful:', response);
+                //     });
+
+                // return Promise.all([
+                //     fetch(request.url)
+                //         .then(function(response) {
+                //             console.log('origin request successful:', response);
+                //         }),
+                //     fetch('https://udpcc-shh.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
+                //         .then(function(response) {
+                //             console.log('Modified request successful:', response);
+                //         })
+                // ]);
+                // let sleep = function(ms){
+                //     const endTime = Date.now()+ms;
+                //     while(Date.now() <= endTime){}
+                // }
+                // return fetch(request.url)
+                //     .then(function (response) {
+                //         console.log('origin request successful:', response);
+                //         sleep(10000)
+                //     });
+            },
+        };
+    });
 
     const defaultSettings = JSON.parse(JSON.stringify($scope.player.getSettings()));
 
@@ -501,7 +538,9 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     }, $scope);
 
     $scope.player.on(dashjs.MediaPlayer.events.BUFFER_EMPTY, function (e) { /* jshint ignore:line */
-        console.log("BUFFER_EMPTY");
+        var dashMetrics = $scope.player.getDashMetrics();
+        var bufferLevel = dashMetrics.getCurrentBufferLevel(e.type, true);
+        console.log("BUFFER_EMPTY", bufferLevel);
         if ($scope.lastBufferEmpty == false) {
             $scope.lastBufferEmpty = true;
             var now = new Date().getTime() / 1000;
@@ -510,22 +549,34 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     }, $scope);
 
     $scope.player.on(dashjs.MediaPlayer.events.BUFFER_LOADED, function (e) { /* jshint ignore:line */
-        console.log("BUFFER_LOADED", $scope.lastBufferEmpty);
+        var dashMetrics = $scope.player.getDashMetrics();
+        var bufferLevel = dashMetrics.getCurrentBufferLevel(e.type, true);
+        console.log("BUFFER_LOADED", bufferLevel);
         if ($scope.lastBufferEmpty == true) {
             var now = new Date().getTime() / 1000;
             $scope.rebufferTime += now - $scope.lastBufferEmptyTime;
             $scope.lastBufferEmpty = false;
             console.log("rebufferTime: %f", $scope.rebufferTime);
         }
-        console.log('quailtySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness, 'QoE:', $scope.qualitySum - $scope.smoothness - 1.85 * $scope.rebufferTime);
     }, $scope);
 
     $scope.player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, function (e) { /* jshint ignore:line */
-        if (e.request.mediaType == 'video') {
-            $scope.qualitySum += e.request.quality;
-            $scope.smoothness += Math.abs(e.request.quality - $scope.lastQuality);
-            $scope.lastQuality = e.request.quality;
-            console.log('new chunk quality:', e.request.quality, 'quailtySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness);
+        var dashMetrics = $scope.player.getDashMetrics();
+        var bufferLevel = dashMetrics.getCurrentBufferLevel(e.request.mediaType, true);
+        let bitrates = $scope.player.getBitrateInfoListFor('video');
+        if (e.request.mediaType == 'video' && e.request.index >= 0) {
+            let quality = bitrates[e.request.quality].bitrate / 1000;
+            if ($scope.lastQuality < 0) {
+                $scope.lastQuality = quality;
+            }
+            $scope.qualitySum += quality;
+            $scope.smoothness += Math.abs(quality - $scope.lastQuality);
+            $scope.lastQuality = quality;
+            console.log('new chunk quality:', quality+'('+e.request.quality+')', 'quailtySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness);
+            console.log(bufferLevel);
+            let requests = dashMetrics.getHttpRequests(e.request.mediaType);
+            let currentRequest = requests[requests.length - 1];
+            console.log('time1:', currentRequest.tresponse.getTime() - currentRequest.trequest.getTime(), 'time2:', currentRequest._tfinish.getTime() - currentRequest.tresponse.getTime());
             console.log('QoE:', $scope.qualitySum - $scope.smoothness - 1.85 * $scope.rebufferTime);
         }
     }, $scope);
@@ -2222,6 +2273,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         $scope.fastSwitchSelected = currentConfig.streaming.buffer.fastSwitchEnabled;
         $scope.videoAutoSwitchSelected = currentConfig.streaming.abr.autoSwitchBitrate.video;
         $scope.customABRRulesSelected = !currentConfig.streaming.abr.useDefaultABRRules;
+        $scope.toggleUseCustomABRRules();
     }
 
     function setDrmOptions() {
@@ -2357,6 +2409,20 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                 if ($scope.player) {
                     $scope.player.updateSettings(config);
                 }
+                $scope.player.updateSettings({
+                    'streaming': {
+                        'buffer': {
+                            'fastSwitchEnabled': $scope.fastSwitchSelected
+                        }
+                    }
+                });
+                $scope.player.updateSettings({
+                    'streaming': {
+                        'abr': {
+                            'useDefaultABRRules': false
+                        }
+                    }
+                });
             } else {
                 // Set default initial configuration
                 var initialConfig = {

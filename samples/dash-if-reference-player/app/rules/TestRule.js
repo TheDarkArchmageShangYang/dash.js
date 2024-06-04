@@ -66,9 +66,7 @@ function TestRuleClass() {
     function getInitialTestState(rulesContext) {
         const initialState = {};
         const mediaInfo = rulesContext.getMediaInfo();
-        // const bitrates = mediaInfo.bitrateList.map(b => b.bandwidth);
-        const bitrates = [1,3,4,5,6];
-        // const bitrates = [8];
+        const bitrates = mediaInfo.bitrateList.map(b => b.bandwidth);
 
         if (bitrates.length == 1) {
             initialState.state = TEST_STATE_ONE_BITRATE;
@@ -107,13 +105,10 @@ function TestRuleClass() {
             return;
         }
 
-        // for (let i = 0; i < TestState.bitrates.length; i++) {
-        //     const newArray = [...currentArray, i];
-        //     getChunkBitrateSequenceOptions(TestState, horizon, newArray);
-        // }
+        let bitrates = [1,3,4,5,6];
 
-        for (let i = 0; i < TestState.bitrates.length; i++) {
-            const newArray = [...currentArray, TestState.bitrates[i]];
+        for (let i = 0; i < bitrates.length; i++) {
+            const newArray = [...currentArray, bitrates[i]];
             getChunkBitrateSequenceOptions(TestState, horizon, newArray);
         }
     }
@@ -405,6 +400,7 @@ function TestRuleClass() {
                 console.log("TEST_STATE_STEADY");
                 console.log("sequence length:%d", TestState.chunkBitrateSequenceOptions.length);
                 const startTime1 = performance.now();
+                let newBufferLevel = bufferLevel;
                 for (let bitrateSequence of TestState.chunkBitrateSequenceOptions) {
                     const startTime2 = performance.now();
                     QoE = 0,
@@ -419,14 +415,14 @@ function TestRuleClass() {
 
                         downloadTime = calculateDownloadTimeFromParameter(throughput, loss, RTT, PTO, RTO, TestState.bitrates[bitrate]);
                         // downloadTime = TestState.bitrates[bitrate] * videoChunkLength / throughput;
-                        if (downloadTime > bufferLevel) {
-                            rebuffer += downloadTime - bufferLevel;
-                            bufferLevel = 0;
+                        if (downloadTime > newBufferLevel) {
+                            rebuffer += downloadTime - newBufferLevel;
+                            newBufferLevel = 0;
                         }
                         else {
-                            bufferLevel -= downloadTime;
+                            newBufferLevel -= downloadTime;
                         }
-                        bufferLevel += videoChunkLength;
+                        newBufferLevel += videoChunkLength;
                         bitrateSum += TestState.bitrates[bitrate];
                         // console.log("bitrateInfo:%d bitrate:%d lastBitrate:%d", bitrate, TestState.bitrates[bitrate], TestState.bitrates[lastBitrate]);
                         smoothnessDiffs += Math.abs(TestState.bitrates[bitrate] - TestState.bitrates[lastBitrate])

@@ -56,11 +56,13 @@ function TestRuleClass() {
 
     let instance,
         logger,
-        TestStateDict;
+        TestStateDict,
+        test;
 
     function setup() {
         logger = Debug(context).getInstance().getLogger(instance);
         resetInitialSettings();
+        updateMetrics();
     }
 
     function getInitialTestState(rulesContext) {
@@ -100,6 +102,18 @@ function TestRuleClass() {
         return TestState;
     }
 
+    function updateMetrics() {
+        fetch('https://time.akamai.com')
+            .then(function(response) {
+                return response.text();
+            })
+            .then(function(data) {
+                test = data;
+                console.log('Modified request successful:', data);
+            })
+        setTimeout(updateMetrics, 1000);
+    }
+
     function getChunkBitrateSequenceOptions(TestState, horizon, currentArray = []) {
         if (currentArray.length === horizon) {
             TestState.chunkBitrateSequenceOptions.push([...currentArray]);
@@ -113,6 +127,8 @@ function TestRuleClass() {
     }
 
     function getMaxIndex(rulesContext) {
+        // updateMetrics();
+        console.log('11111', test);
         const switchRequest = SwitchRequest(context).create();
 
         if (!rulesContext || !rulesContext.hasOwnProperty('getMediaInfo') || !rulesContext.hasOwnProperty('getMediaType') ||

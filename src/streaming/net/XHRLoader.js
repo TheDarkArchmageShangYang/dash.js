@@ -43,20 +43,12 @@ function XHRLoader(cfg) {
     const requestModifier = cfg.requestModifier;
 
     let instance;
+    let packetNumber = 0;
 
     function load(httpRequest) {
         if (requestModifier && requestModifier.modifyRequest) {
             modifyRequest(httpRequest, requestModifier)
-                .then(() => {
-                    Promise.all([
-                        fetch('https://udpcc-shh.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
-                            .then(function(response) {
-                                console.log('Modified request successful:', response.text());
-                            }),
-                        request(httpRequest)
-                    ]);
-                    // request(httpRequest)
-                });
+                .then(() => request(httpRequest));
         }
         else {
             request(httpRequest);
@@ -119,9 +111,14 @@ function XHRLoader(cfg) {
         x.abort();
     }
 
+    function getPacketNumber() {
+        return packetNumber;
+    }
+
     instance = {
         load: load,
-        abort: abort
+        abort: abort,
+        getPacketNumber: getPacketNumber
     };
 
     return instance;

@@ -1021,6 +1021,15 @@
                             </div>
 
                             <div class="text-success">
+                                <input id="videoRebufferTimeCB" type="checkbox" ng-model="chartState.video.rebufferTime.selected"
+                                       ng-change="enableChartByName('rebufferTime', 'video')">
+                                <label class="text-primary" for="videoRebufferTimeCB" data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="The total rebuffer time of the video">Rebuffer Time
+                                    :</label> {{videoRebufferTime}} s
+                            </div>
+
+                            <div class="text-success">
                                 <input id="videoPendingIndexCB" type="checkbox"
                                        ng-model="chartState.video.pendingIndex.selected"
                                        ng-change="enableChartByName('pendingIndex', 'video')">

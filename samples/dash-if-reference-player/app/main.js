@@ -137,6 +137,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         audio: {
             buffer: { data: [], selected: false, color: '#65080c', label: 'Audio Buffer Level' },
             bitrate: { data: [], selected: false, color: '#00CCBE', label: 'Audio Bitrate (kbps)' },
+            rebufferTime: { data: [], selected: false, color: '#326e88', label: 'Rebuffer Time (ms)' },
             index: { data: [], selected: false, color: '#ffd446', label: 'Audio Current Index' },
             pendingIndex: { data: [], selected: false, color: '#FF6700', label: 'AudioPending Index' },
             ratio: { data: [], selected: false, color: '#329d61', label: 'Audio Ratio' },
@@ -149,8 +150,9 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             playbackRate: { data: [], selected: false, color: '#65080c', label: 'Playback Rate' }
         },
         video: {
-            buffer: { data: [], selected: true, color: '#00589d', label: 'Video Buffer Level' },
+            buffer: { data: [], selected: false, color: '#00589d', label: 'Video Buffer Level' },
             bitrate: { data: [], selected: true, color: '#ff7900', label: 'Video Bitrate (kbps)' },
+            rebufferTime: { data: [], selected: true, color: '#326e88', label: 'Rebuffer Time (ms)' },
             index: { data: [], selected: false, color: '#326e88', label: 'Video Current Quality' },
             pendingIndex: { data: [], selected: false, color: '#44c248', label: 'Video Pending Index' },
             ratio: { data: [], selected: false, color: '#00CCBE', label: 'Video Ratio' },
@@ -339,6 +341,10 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.isCasting = false;
     $scope.castPlayerState = 'IDLE';
 
+    $scope.rebufferTime = 0;
+    $scope.lastBufferEmpty = false;
+    $scope.lastBufferEmptyTime = 0;
+
     ////////////////////////////////////////
     //
     // Player Setup
@@ -489,6 +495,29 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             if (!existingViolation || existingViolation.length === 0) {
                 $scope.conformanceViolations.push(e);
             }
+        }
+    }, $scope);
+
+    $scope.player.on(dashjs.MediaPlayer.events.BUFFER_EMPTY, function (e) { /* jshint ignore:line */
+        var dashMetrics = $scope.player.getDashMetrics();
+        var bufferLevel = dashMetrics.getCurrentBufferLevel(e.type, true);
+        console.log("BUFFER_EMPTY", bufferLevel);
+        if ($scope.lastBufferEmpty == false) {
+            $scope.lastBufferEmpty = true;
+            var now = new Date().getTime() / 1000;
+            $scope.lastBufferEmptyTime = now;
+        }
+    }, $scope);
+
+    $scope.player.on(dashjs.MediaPlayer.events.BUFFER_LOADED, function (e) { /* jshint ignore:line */
+        var dashMetrics = $scope.player.getDashMetrics();
+        var bufferLevel = dashMetrics.getCurrentBufferLevel(e.type, true);
+        console.log("BUFFER_LOADED", bufferLevel);
+        if ($scope.lastBufferEmpty == true) {
+            var now = new Date().getTime() / 1000;
+            $scope.rebufferTime += now - $scope.lastBufferEmptyTime;
+            $scope.lastBufferEmpty = false;
+            console.log("rebufferTime: %f", $scope.rebufferTime);
         }
     }, $scope);
 
@@ -2082,6 +2111,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                 playbackRate = parseFloat($scope.player.getPlaybackRate().toFixed(2));
             }
 
+            $scope[type + 'RebufferTime'] = $scope.rebufferTime;
             $scope[type + 'BufferLength'] = bufferLevel;
             $scope[type + 'MaxIndex'] = maxIndex;
             $scope[type + 'DroppedFrames'] = droppedFPS;
@@ -2101,6 +2131,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                 var time = getTimeForPlot();
                 $scope.plotPoint('buffer', type, bufferLevel, time);
                 $scope.plotPoint('index', type, index, time);
+                $scope.plotPoint('rebufferTime', type, $scope.rebufferTime, time);
                 $scope.plotPoint('bitrate', type, bitrate, time);
                 $scope.plotPoint('droppedFPS', type, droppedFPS, time);
                 $scope.plotPoint('liveLatency', type, liveLatency, time);

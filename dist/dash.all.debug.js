@@ -47627,17 +47627,17 @@ ThroughputHistory.__dashjs_factory_name = 'ThroughputHistory';
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _ThroughputRule__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ThroughputRule */ "./src/streaming/rules/abr/ThroughputRule.js");
-/* harmony import */ var _InsufficientBufferRule__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./InsufficientBufferRule */ "./src/streaming/rules/abr/InsufficientBufferRule.js");
-/* harmony import */ var _AbandonRequestsRule__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./AbandonRequestsRule */ "./src/streaming/rules/abr/AbandonRequestsRule.js");
-/* harmony import */ var _DroppedFramesRule__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./DroppedFramesRule */ "./src/streaming/rules/abr/DroppedFramesRule.js");
-/* harmony import */ var _SwitchHistoryRule__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./SwitchHistoryRule */ "./src/streaming/rules/abr/SwitchHistoryRule.js");
-/* harmony import */ var _BolaRule__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./BolaRule */ "./src/streaming/rules/abr/BolaRule.js");
-/* harmony import */ var _L2ARule_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./L2ARule.js */ "./src/streaming/rules/abr/L2ARule.js");
-/* harmony import */ var _lolp_LoLpRule_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./lolp/LoLpRule.js */ "./src/streaming/rules/abr/lolp/LoLpRule.js");
-/* harmony import */ var _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../../core/FactoryMaker */ "./src/core/FactoryMaker.js");
-/* harmony import */ var _SwitchRequest__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../SwitchRequest */ "./src/streaming/rules/SwitchRequest.js");
-/* harmony import */ var _constants_Constants__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../constants/Constants */ "./src/streaming/constants/Constants.js");
+/* harmony import */ var _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../core/FactoryMaker */ "./src/core/FactoryMaker.js");
+/* harmony import */ var _constants_Constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../constants/Constants */ "./src/streaming/constants/Constants.js");
+/* harmony import */ var _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../SwitchRequest */ "./src/streaming/rules/SwitchRequest.js");
+/* harmony import */ var _AbandonRequestsRule__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./AbandonRequestsRule */ "./src/streaming/rules/abr/AbandonRequestsRule.js");
+/* harmony import */ var _BolaRule__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./BolaRule */ "./src/streaming/rules/abr/BolaRule.js");
+/* harmony import */ var _DroppedFramesRule__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./DroppedFramesRule */ "./src/streaming/rules/abr/DroppedFramesRule.js");
+/* harmony import */ var _InsufficientBufferRule__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./InsufficientBufferRule */ "./src/streaming/rules/abr/InsufficientBufferRule.js");
+/* harmony import */ var _L2ARule_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./L2ARule.js */ "./src/streaming/rules/abr/L2ARule.js");
+/* harmony import */ var _SwitchHistoryRule__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./SwitchHistoryRule */ "./src/streaming/rules/abr/SwitchHistoryRule.js");
+/* harmony import */ var _ThroughputRule__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./ThroughputRule */ "./src/streaming/rules/abr/ThroughputRule.js");
+/* harmony import */ var _lolp_LoLpRule_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./lolp/LoLpRule.js */ "./src/streaming/rules/abr/lolp/LoLpRule.js");
 /**
  * The copyright in this software is being made available under the BSD License,
  * included below. This software may be subject to other third party and contributor
@@ -47697,45 +47697,45 @@ function ABRRulesCollection(config) {
 
     if (settings.get().streaming.abr.useDefaultABRRules) {
       // If L2A is used we only need this one rule
-      if (settings.get().streaming.abr.ABRStrategy === _constants_Constants__WEBPACK_IMPORTED_MODULE_10__["default"].ABR_STRATEGY_L2A) {
-        qualitySwitchRules.push((0,_L2ARule_js__WEBPACK_IMPORTED_MODULE_6__["default"])(context).create({
+      if (settings.get().streaming.abr.ABRStrategy === _constants_Constants__WEBPACK_IMPORTED_MODULE_1__["default"].ABR_STRATEGY_L2A) {
+        qualitySwitchRules.push((0,_L2ARule_js__WEBPACK_IMPORTED_MODULE_7__["default"])(context).create({
           dashMetrics: dashMetrics,
           settings: settings
         }));
       } // If LoLP is used we only need this one rule
-      else if (settings.get().streaming.abr.ABRStrategy === _constants_Constants__WEBPACK_IMPORTED_MODULE_10__["default"].ABR_STRATEGY_LoLP) {
-        qualitySwitchRules.push((0,_lolp_LoLpRule_js__WEBPACK_IMPORTED_MODULE_7__["default"])(context).create({
+      else if (settings.get().streaming.abr.ABRStrategy === _constants_Constants__WEBPACK_IMPORTED_MODULE_1__["default"].ABR_STRATEGY_LoLP) {
+        qualitySwitchRules.push((0,_lolp_LoLpRule_js__WEBPACK_IMPORTED_MODULE_10__["default"])(context).create({
           dashMetrics: dashMetrics
         }));
       } else {
         // Only one of BolaRule and ThroughputRule will give a switchRequest.quality !== SwitchRequest.NO_CHANGE.
         // This is controlled by useBufferOccupancyABR mechanism in AbrController.
-        qualitySwitchRules.push((0,_BolaRule__WEBPACK_IMPORTED_MODULE_5__["default"])(context).create({
+        qualitySwitchRules.push((0,_BolaRule__WEBPACK_IMPORTED_MODULE_4__["default"])(context).create({
           dashMetrics: dashMetrics,
           mediaPlayerModel: mediaPlayerModel,
           settings: settings
         }));
-        qualitySwitchRules.push((0,_ThroughputRule__WEBPACK_IMPORTED_MODULE_0__["default"])(context).create({
+        qualitySwitchRules.push((0,_ThroughputRule__WEBPACK_IMPORTED_MODULE_9__["default"])(context).create({
           dashMetrics: dashMetrics
         }));
 
         if (settings.get().streaming.abr.additionalAbrRules.insufficientBufferRule) {
-          qualitySwitchRules.push((0,_InsufficientBufferRule__WEBPACK_IMPORTED_MODULE_1__["default"])(context).create({
+          qualitySwitchRules.push((0,_InsufficientBufferRule__WEBPACK_IMPORTED_MODULE_6__["default"])(context).create({
             dashMetrics: dashMetrics,
             settings: settings
           }));
         }
 
         if (settings.get().streaming.abr.additionalAbrRules.switchHistoryRule) {
-          qualitySwitchRules.push((0,_SwitchHistoryRule__WEBPACK_IMPORTED_MODULE_4__["default"])(context).create());
+          qualitySwitchRules.push((0,_SwitchHistoryRule__WEBPACK_IMPORTED_MODULE_8__["default"])(context).create());
         }
 
         if (settings.get().streaming.abr.additionalAbrRules.droppedFramesRule) {
-          qualitySwitchRules.push((0,_DroppedFramesRule__WEBPACK_IMPORTED_MODULE_3__["default"])(context).create());
+          qualitySwitchRules.push((0,_DroppedFramesRule__WEBPACK_IMPORTED_MODULE_5__["default"])(context).create());
         }
 
         if (settings.get().streaming.abr.additionalAbrRules.abandonRequestsRule) {
-          abandonFragmentRules.push((0,_AbandonRequestsRule__WEBPACK_IMPORTED_MODULE_2__["default"])(context).create({
+          abandonFragmentRules.push((0,_AbandonRequestsRule__WEBPACK_IMPORTED_MODULE_3__["default"])(context).create({
             dashMetrics: dashMetrics,
             mediaPlayerModel: mediaPlayerModel,
             settings: settings
@@ -47759,7 +47759,7 @@ function ABRRulesCollection(config) {
 
   function _getRulesWithChange(srArray) {
     return srArray.filter(function (sr) {
-      return sr.quality > _SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].NO_CHANGE;
+      return sr.quality > _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE;
     });
   }
   /**
@@ -47778,41 +47778,43 @@ function ABRRulesCollection(config) {
       return;
     }
 
-    values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].PRIORITY.STRONG] = {
-      quality: _SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].NO_CHANGE,
+    values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].PRIORITY.STRONG] = {
+      quality: _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE,
       reason: null
     };
-    values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].PRIORITY.WEAK] = {
-      quality: _SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].NO_CHANGE,
+    values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].PRIORITY.WEAK] = {
+      quality: _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE,
       reason: null
     };
-    values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].PRIORITY.DEFAULT] = {
-      quality: _SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].NO_CHANGE,
+    values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].PRIORITY.DEFAULT] = {
+      quality: _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE,
       reason: null
     };
 
     for (i = 0, len = srArray.length; i < len; i += 1) {
       req = srArray[i];
 
-      if (req.quality !== _SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].NO_CHANGE) {
+      if (req.quality !== _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE) {
         // We only use the new quality in case it is lower than the already saved one or if no new quality has been selected for the respective priority
-        if (values[req.priority].quality === _SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].NO_CHANGE || values[req.priority].quality > req.quality) {
+        if (values[req.priority].quality === _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE || values[req.priority].quality > req.quality) {
+          req.quality = req.quality > 7 ? 7 : req.quality;
+          req.quality = req.quality < 3 ? 3 : req.quality;
           values[req.priority].quality = req.quality;
           values[req.priority].reason = req.reason || null;
         }
       }
     }
 
-    if (values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].PRIORITY.WEAK].quality !== _SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].NO_CHANGE) {
-      newSwitchReq = values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].PRIORITY.WEAK];
+    if (values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].PRIORITY.WEAK].quality !== _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE) {
+      newSwitchReq = values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].PRIORITY.WEAK];
     }
 
-    if (values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].PRIORITY.DEFAULT].quality !== _SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].NO_CHANGE) {
-      newSwitchReq = values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].PRIORITY.DEFAULT];
+    if (values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].PRIORITY.DEFAULT].quality !== _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE) {
+      newSwitchReq = values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].PRIORITY.DEFAULT];
     }
 
-    if (values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].PRIORITY.STRONG].quality !== _SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].NO_CHANGE) {
-      newSwitchReq = values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"].PRIORITY.STRONG];
+    if (values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].PRIORITY.STRONG].quality !== _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE) {
+      newSwitchReq = values[_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].PRIORITY.STRONG];
     }
 
     if (newSwitchReq) {
@@ -47820,7 +47822,7 @@ function ABRRulesCollection(config) {
       reason = newSwitchReq.reason;
     }
 
-    return (0,_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"])(context).create(quality, reason);
+    return (0,_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"])(context).create(quality, reason);
   }
 
   function getMaxQuality(rulesContext) {
@@ -47831,7 +47833,7 @@ function ABRRulesCollection(config) {
     var activeRules = _getRulesWithChange(switchRequestArray);
 
     var maxQuality = getMinSwitchRequest(activeRules);
-    return maxQuality || (0,_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"])(context).create();
+    return maxQuality || (0,_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"])(context).create();
   }
 
   function shouldAbandonFragment(rulesContext, streamId) {
@@ -47847,7 +47849,7 @@ function ABRRulesCollection(config) {
       shouldAbandon.reason.forceAbandon = true;
     }
 
-    return shouldAbandon || (0,_SwitchRequest__WEBPACK_IMPORTED_MODULE_9__["default"])(context).create();
+    return shouldAbandon || (0,_SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"])(context).create();
   }
 
   function reset() {
@@ -47878,10 +47880,10 @@ function ABRRulesCollection(config) {
 }
 
 ABRRulesCollection.__dashjs_factory_name = 'ABRRulesCollection';
-var factory = _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_8__["default"].getClassFactory(ABRRulesCollection);
+var factory = _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_0__["default"].getClassFactory(ABRRulesCollection);
 factory.QUALITY_SWITCH_RULES = QUALITY_SWITCH_RULES;
 factory.ABANDON_FRAGMENT_RULES = ABANDON_FRAGMENT_RULES;
-_core_FactoryMaker__WEBPACK_IMPORTED_MODULE_8__["default"].updateSingletonFactory(ABRRulesCollection.__dashjs_factory_name, factory);
+_core_FactoryMaker__WEBPACK_IMPORTED_MODULE_0__["default"].updateSingletonFactory(ABRRulesCollection.__dashjs_factory_name, factory);
 /* harmony default export */ __webpack_exports__["default"] = (factory);
 
 /***/ }),

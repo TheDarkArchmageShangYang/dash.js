@@ -17416,7 +17416,7 @@ function ABRRulesCollection(config) {
         // We only use the new quality in case it is lower than the already saved one or if no new quality has been selected for the respective priority
         if (values[req.priority].quality === _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE || values[req.priority].quality > req.quality) {
           req.quality = req.quality > 7 ? 7 : req.quality;
-          req.quality = req.quality < 3 ? 3 : req.quality;
+          req.quality = req.quality < 5 ? 5 : req.quality;
           values[req.priority].quality = req.quality;
           values[req.priority].reason = req.reason || null;
         }

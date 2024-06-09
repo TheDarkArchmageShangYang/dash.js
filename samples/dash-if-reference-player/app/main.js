@@ -35,7 +35,7 @@ angular.module('DashIFTestVectorsService', ['ngResource']).factory('dashifTestVe
 
 app.controller('DashController', ['$scope', '$window', 'sources', 'contributors', 'dashifTestVectors', function ($scope, $window, sources, contributors, dashifTestVectors) {
     $scope.selectedItem = {
-        url: 'https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd'
+        url: 'https://udpcc-shh2.dfshan.net:8000/video/manifest.mpd'
     };
 
     sources.query(function (data) {
@@ -303,7 +303,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.cmsdEnabled = false;
     $scope.cmsdApplyMb = false;
     $scope.cmsdEtpWeightRatio = 0;
-    $scope.loopSelected = true;
+    $scope.loopSelected = false;
     $scope.scheduleWhilePausedSelected = true;
     $scope.calcSegmentAvailabilityRangeFromTimelineSelected = false;
     $scope.reuseExistingSourceBuffersSelected = true;
@@ -513,7 +513,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         var dashMetrics = $scope.player.getDashMetrics();
         var bufferLevel = dashMetrics.getCurrentBufferLevel(e.type, true);
         console.log("BUFFER_LOADED", bufferLevel);
-        if ($scope.lastBufferEmpty == true) {
+        if ($scope.lastBufferEmpty == true && e.request.index >= 5) {
             var now = new Date().getTime() / 1000;
             $scope.rebufferTime += now - $scope.lastBufferEmptyTime;
             $scope.lastBufferEmpty = false;
@@ -2038,9 +2038,9 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             if (specificChart) {
                 var data = specificChart[name].data;
                 data.push([time, value]);
-                if (data.length > $scope.maxPointsToChart) {
-                    data.splice(0, 1);
-                }
+                // if (data.length > $scope.maxPointsToChart) {
+                //     data.splice(0, 1);
+                // }
             }
         }
     };

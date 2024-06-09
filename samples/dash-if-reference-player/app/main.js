@@ -513,7 +513,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         var dashMetrics = $scope.player.getDashMetrics();
         var bufferLevel = dashMetrics.getCurrentBufferLevel(e.type, true);
         console.log("BUFFER_LOADED", bufferLevel);
-        if ($scope.lastBufferEmpty == true && e.request.index >= 5) {
+        if ($scope.lastBufferEmpty == true) {
             var now = new Date().getTime() / 1000;
             $scope.rebufferTime += now - $scope.lastBufferEmptyTime;
             $scope.lastBufferEmpty = false;

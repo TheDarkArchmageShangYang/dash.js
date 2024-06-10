@@ -35,7 +35,7 @@ angular.module('DashIFTestVectorsService', ['ngResource']).factory('dashifTestVe
 
 app.controller('DashController', ['$scope', '$window', 'sources', 'contributors', 'dashifTestVectors', function ($scope, $window, sources, contributors, dashifTestVectors) {
     $scope.selectedItem = {
-        url: 'https://udpcc-shh2.dfshan.net:8000/video/bbb_30fps.mpd'
+        url: 'https://udpcc-shh2.dfshan.net:8000/video1/manifest.mpd'
         // url: 'https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd'
     };
 

@@ -139,6 +139,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             buffer: { data: [], selected: false, color: '#65080c', label: 'Audio Buffer Level' },
             bitrate: { data: [], selected: false, color: '#00CCBE', label: 'Audio Bitrate (kbps)' },
             rebufferTime: { data: [], selected: false, color: '#326e88', label: 'Rebuffer Time (ms)' },
+            averageBitrate: { data: [], selected: false, color: '#00CCBE', label: 'Average Bitrate (kbps)' },
             index: { data: [], selected: false, color: '#ffd446', label: 'Audio Current Index' },
             pendingIndex: { data: [], selected: false, color: '#FF6700', label: 'AudioPending Index' },
             ratio: { data: [], selected: false, color: '#329d61', label: 'Audio Ratio' },
@@ -154,6 +155,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             buffer: { data: [], selected: false, color: '#00589d', label: 'Video Buffer Level' },
             bitrate: { data: [], selected: true, color: '#ff7900', label: 'Video Bitrate (kbps)' },
             rebufferTime: { data: [], selected: true, color: '#326e88', label: 'Rebuffer Time (ms)' },
+            averageBitrate: { data: [], selected: false, color: '#00CCBE', label: 'Average Bitrate (kbps)' },
             index: { data: [], selected: false, color: '#326e88', label: 'Video Current Quality' },
             pendingIndex: { data: [], selected: false, color: '#44c248', label: 'Video Pending Index' },
             ratio: { data: [], selected: false, color: '#00CCBE', label: 'Video Ratio' },
@@ -297,7 +299,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.audioPlaybackRate = 1.00;
 
     // Starting Options
-    $scope.autoPlaySelected = true;
+    $scope.autoPlaySelected = false;
     $scope.autoLoadSelected = false;
     $scope.muted = false;
     $scope.cmcdEnabled = false;
@@ -348,6 +350,9 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.qualitySum = 0;
     $scope.smoothness = 0;
     $scope.lastQuality = -1;
+
+    $scope.sumBitrate = 0;
+    $scope.averageBitrate = 0;
 
     ////////////////////////////////////////
     //
@@ -430,6 +435,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.controlbar.initialize();
     $scope.controlbar.disable();
     $scope.version = $scope.player.getVersion();
+    $scope.str = 'dash.js默认算法+QUIC';
 
     $scope.player.on(dashjs.MediaPlayer.events.MANIFEST_LOADED, function (e) { /* jshint ignore:line */
         $scope.isDynamic = e.data.type === 'dynamic';
@@ -531,13 +537,16 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         let bitrates = $scope.player.getBitrateInfoListFor('video');
         if (e.request.mediaType == 'video' && e.request.index >= 0) {
             let quality = bitrates[e.request.quality].bitrate / 1000;
+            $scope.sumBitrate += quality;
+            $scope.averageBitrate = $scope.sumBitrate / e.request.index;
+            console.log('quality',quality,'index',e.request.index);
             if ($scope.lastQuality < 0) {
                 $scope.lastQuality = quality;
             }
             $scope.qualitySum += quality;
             $scope.smoothness += Math.abs(quality - $scope.lastQuality);
             $scope.lastQuality = quality;
-            console.log('new chunk quality:', quality+'('+e.request.quality+')', 'quailtySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness);
+            console.log('new chunk quality:', quality+'('+e.request.quality+')', 'qualitySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness);
             console.log('bufferLevel',bufferLevel);
             // let requests = dashMetrics.getHttpRequests(e.request.mediaType);
             // let currentRequest = requests[requests.length - 1];
@@ -2137,6 +2146,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             }
 
             $scope[type + 'RebufferTime'] = $scope.rebufferTime;
+            $scope[type + 'AverageBitrate'] = $scope.averageBitrate;
             $scope[type + 'BufferLength'] = bufferLevel;
             $scope[type + 'MaxIndex'] = maxIndex;
             $scope[type + 'DroppedFrames'] = droppedFPS;
@@ -2157,6 +2167,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                 $scope.plotPoint('buffer', type, bufferLevel, time);
                 $scope.plotPoint('index', type, index, time);
                 $scope.plotPoint('rebufferTime', type, $scope.rebufferTime, time);
+                $scope.plotPoint('averageBitrate', type, $scope.averageBitrate, time);
                 $scope.plotPoint('bitrate', type, bitrate, time);
                 $scope.plotPoint('droppedFPS', type, droppedFPS, time);
                 $scope.plotPoint('liveLatency', type, liveLatency, time);

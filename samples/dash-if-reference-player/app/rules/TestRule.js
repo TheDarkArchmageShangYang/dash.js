@@ -36,11 +36,14 @@ const TEST_STATE_ONE_BITRATE = 0;
 const TEST_STATE_STARTUP = 1;
 const TEST_STATE_STEADY = 2;
 
-const horizon = 4;
-const bufferMaxSize = 25;
-const videoChunkLength = 2;
-const rebufferPenalty = 1.85;
+const horizon = 2;
+// const bufferMaxSize = 25;
+const videoChunkLength = 2000;
+const rebufferPenalty = 4;
 const MTU = 1166;
+// const setBitrates = [1,3,4,5,6];
+// const setBitrates = [3,4,5,6];
+const setBitrates = [4,5];
 
 function TestRuleClass() {
 
@@ -55,18 +58,24 @@ function TestRuleClass() {
 
     let instance,
         logger,
-        TestStateDict,
-        qualityDict = [];
+        TestStateDict;
+
+    let bandwidth_xquic = 3000,
+        loss_xquic = 0,
+        rtt_xquic = 52.5,
+        pto_xquic = 52.5+200,
+        rto_xquic = 1000;
 
     function setup() {
         logger = Debug(context).getInstance().getLogger(instance);
         resetInitialSettings();
+        updateMetrics();
     }
 
     function getInitialTestState(rulesContext) {
         const initialState = {};
         const mediaInfo = rulesContext.getMediaInfo();
-        const bitrates = mediaInfo.bitrateList.map(b => b.bandwidth);
+        const bitrates = mediaInfo.bitrateList.map(b => b.bandwidth / 1000);
 
         if (bitrates.length == 1) {
             initialState.state = TEST_STATE_ONE_BITRATE;
@@ -99,16 +108,37 @@ function TestRuleClass() {
         return TestState;
     }
 
+    function updateMetrics() {
+        const regex = /\|bw:(\d+\.\d+)\|loss:(\d+\.\d+)\|rtt:(\d+)\|pto:(\d+)\|rto:(\d+)\|/;
+        fetch('https://udpcc-shh.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
+            .then(function(response) {
+                return response.text();
+            })
+            .then(function(data) {
+                let test = data;
+                const match = test.match(regex);
+
+                if (match) {
+                    bandwidth_xquic = parseFloat(match[1], 10) / 1000;
+                    loss_xquic = parseFloat(match[2], 10);
+                    rtt_xquic = parseInt(match[3], 10) / 1000;
+                    pto_xquic = parseInt(match[4], 10) / 1000;
+                    rto_xquic = parseInt(match[5], 10) / 1000;
+                }
+                console.log(bandwidth_xquic, loss_xquic, rtt_xquic, pto_xquic, rto_xquic);
+                console.log('Modified request successful:', test);
+            })
+        setTimeout(updateMetrics, 1000);
+    }
+
     function getChunkBitrateSequenceOptions(TestState, horizon, currentArray = []) {
         if (currentArray.length === horizon) {
             TestState.chunkBitrateSequenceOptions.push([...currentArray]);
             return;
         }
 
-        let bitrates = [1,3,4,5,6];
-
-        for (let i = 0; i < bitrates.length; i++) {
-            const newArray = [...currentArray, bitrates[i]];
+        for (let i = 0; i < setBitrates.length; i++) {
+            const newArray = [...currentArray, setBitrates[i]];
             getChunkBitrateSequenceOptions(TestState, horizon, newArray);
         }
     }
@@ -331,7 +361,6 @@ function TestRuleClass() {
     }
 
     function getMaxIndex(rulesContext) {
-        console.log("Test Rule is working");
         const switchRequest = SwitchRequest(context).create();
 
         if (!rulesContext || !rulesContext.hasOwnProperty('getMediaInfo') || !rulesContext.hasOwnProperty('getMediaType') ||
@@ -356,64 +385,75 @@ function TestRuleClass() {
             return switchRequest;
         }
 
-        // const bufferLevel = dashMetrics.getCurrentBufferLevel(mediaType);
-        // const throughput = throughputHistory.getAverageThroughput(mediaType, isDynamic);
+        const bufferLevel = dashMetrics.getCurrentBufferLevel(mediaType) * 1000;
+        const throughput = throughputHistory.getAverageThroughput(mediaType, isDynamic);
         const safeThroughput = throughputHistory.getSafeAverageThroughput(mediaType, isDynamic);
-        let bufferLevel = 15;
-        const throughput = 200000;
-        const RTT = 0.2525;
-        const loss = 0.1;
-        const PTO = RTT + 0.2;
-        const RTO = 1;
+        // let bufferLevel = 15;
+        // const throughput = 200000;
+        // const RTT = 0.2525;
+        // const loss = 0.1;
+        // const PTO = RTT + 0.2;
+        // const RTO = 1;
         const latency = throughputHistory.getAverageLatency(mediaType);
         let quality;
 
         switchRequest.reason.state = TestState.state;
-        switchRequest.reason.throughput = throughput;
+        switchRequest.reason.throughput = bandwidth_xquic;
         switchRequest.reason.latency = latency;
         let bitrateSequenceSelected = [],
             QoE,
-            maxQoE,
+            maxQoE = -Infinity,
             rebuffer,
             bitrateSum,
             smoothnessDiffs,
-            downloadTime;
+            downloadTime,
+            lastBitrate;
 
         if (isNaN(throughput)) {
             return switchRequest;
         }
-
+        
+        console.log(bandwidth_xquic, loss_xquic, rtt_xquic, pto_xquic, rto_xquic);
         switch (TestState.state) {
             case TEST_STATE_STARTUP:
-                console.log("TEST_STATE_STARTUP");
+                // console.log("TEST_STATE_STARTUP");
                 quality = abrController.getQualityForBitrate(mediaInfo, safeThroughput, streamId, latency);
+                
+                let cur = 0;
+                for (let i = 0; i < setBitrates.length; i++) {
+                    if (quality >= setBitrates[i]) {
+                        cur = setBitrates[i];
+                    }
+                }
 
-                switchRequest.quality = quality;
+                switchRequest.quality = cur;
                 switchRequest.reason.throughput = safeThroughput;
 
-                qualityDict.push(quality);
-                TestState.lastQuality = quality;
-                TestState.state = TEST_STATE_STEADY;
+                TestState.lastQuality = cur;
+                if (bufferLevel >= videoChunkLength) {
+                    TestState.state = TEST_STATE_STEADY;
+                }
                 break;
 
             case TEST_STATE_STEADY:
-                console.log("TEST_STATE_STEADY");
-                console.log("sequence length:%d", TestState.chunkBitrateSequenceOptions.length);
-                const startTime1 = performance.now();
-                let newBufferLevel = bufferLevel;
+                // console.log("TEST_STATE_STEADY");
+                // console.log("sequence length:%d", TestState.chunkBitrateSequenceOptions.length);
+                // const startTime1 = performance.now();
                 for (let bitrateSequence of TestState.chunkBitrateSequenceOptions) {
-                    const startTime2 = performance.now();
-                    QoE = 0,
-                    rebuffer = 0,
-                    bitrateSum = 0,
-                    smoothnessDiffs = 0,
-                    maxQoE = -Infinity;
+                    // const startTime2 = performance.now();
+                    let newBufferLevel = bufferLevel;
+                    QoE = 0;
+                    rebuffer = 0;
+                    bitrateSum = 0;
+                    smoothnessDiffs = 0;
                     lastBitrate = TestState.lastQuality;
 
                     for (let i = 0; i< horizon; i++) {
                         let bitrate = bitrateSequence[i];
-
-                        downloadTime = calculateDownloadTimeFromParameter(throughput, loss, RTT, PTO, RTO, TestState.bitrates[bitrate]);
+                        // downloadTime = calculateDownloadTimeFromParameter(bandwidth_xquic, loss_xquic, rtt_xquic, pto_xquic, rto_xquic, TestState.bitrates[bitrate]);
+                        downloadTime = calculateDownloadTimeFromParameter(Math.max(bandwidth_xquic,throughput), loss_xquic, rtt_xquic, pto_xquic, rto_xquic, TestState.bitrates[bitrate]);
+                        console.log('bandwidth_xquic:',bandwidth_xquic,'throughput:',throughput);
+                        console.log('downloadTime:',downloadTime,'bufferLevel:',newBufferLevel);
                         // downloadTime = TestState.bitrates[bitrate] * videoChunkLength / throughput;
                         if (downloadTime > newBufferLevel) {
                             rebuffer += downloadTime - newBufferLevel;
@@ -424,26 +464,25 @@ function TestRuleClass() {
                         }
                         newBufferLevel += videoChunkLength;
                         bitrateSum += TestState.bitrates[bitrate];
-                        // console.log("bitrateInfo:%d bitrate:%d lastBitrate:%d", bitrate, TestState.bitrates[bitrate], TestState.bitrates[lastBitrate]);
                         smoothnessDiffs += Math.abs(TestState.bitrates[bitrate] - TestState.bitrates[lastBitrate])
                         lastBitrate = bitrate;
                     }
 
                     QoE += bitrateSum - smoothnessDiffs - rebufferPenalty * rebuffer;
-                    // console.log("bitrateSum:%d smoothnessDiffs:%d rebuffer:%d QoE:%d", bitrateSum, smoothnessDiffs, rebuffer, QoE);
+                    // console.log('downloadTime:',downloadTime);
+                    console.log('select:',bitrateSequence[0],bitrateSequence[1],'bitrateSum:',bitrateSum,'lastBitrate:',TestState.bitrates[TestState.lastQuality],'smoothnessDiffs:',smoothnessDiffs,'rebuffer:',rebuffer,'QoE:',QoE);
                     if (QoE >= maxQoE) {
+                        // console.log('preSelect:',bitrateSequenceSelected[0],'preQoE:',maxQoE,'nowSelect:',bitrateSequence[0],'nowQoE:',QoE);
                         bitrateSequenceSelected = bitrateSequence;
                         maxQoE = QoE;
                     }
-                    // console.log("Options:%d|%d|%d|%d|%d: %f, max: %f", bitrateSequence[0], bitrateSequence[1], bitrateSequence[2], bitrateSequence[3], bitrateSequence[4], QoE, maxQoE);
-                    // console.log("Options:%d|%d: %f, max: %f", bitrateSequenceSelected[0], bitrateSequenceSelected[1], QoE, maxQoE);
-                    const endTime2 = performance.now();
-                    const executionTime2 = endTime2 - startTime2;
+                    // const endTime2 = performance.now();
+                    // const executionTime2 = endTime2 - startTime2;
                     // console.log('代码运行时间：', executionTime2, '毫秒');
                 }
-                const endTime1 = performance.now();
-                const executionTime1 = endTime1 - startTime1;
-                console.log('代码总运行时间：', executionTime1, '毫秒');
+                // const endTime1 = performance.now();
+                // const executionTime1 = endTime1 - startTime1;
+                // console.log('代码总运行时间：', executionTime1, '毫秒');
 
                 switchRequest.quality = bitrateSequenceSelected[0];
                 console.log("select %d: %d", bitrateSequenceSelected[0], TestState.bitrates[bitrateSequenceSelected[0]]);
@@ -451,7 +490,6 @@ function TestRuleClass() {
                 switchRequest.reason.latency = latency;
                 switchRequest.reason.bufferLevel = bufferLevel;
 
-                qualityDict.push(bitrateSequenceSelected[0]);
                 TestState.lastQuality = bitrateSequenceSelected[0];
                 break;
             default:

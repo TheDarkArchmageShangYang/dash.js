@@ -2,6 +2,12 @@
 
 var app = angular.module('DashPlayer', ['DashSourcesService', 'DashContributorsService', 'DashIFTestVectorsService', 'angular-flot']); /* jshint ignore:line */
 
+window.bandwidth_xquic = 0;
+window.loss_xquic = 0;
+window.rtt_xquic = 0;
+window.pto_xquic = 0;
+window.rto_xquic = 0;
+
 $(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip();
 });
@@ -35,7 +41,7 @@ angular.module('DashIFTestVectorsService', ['ngResource']).factory('dashifTestVe
 
 app.controller('DashController', ['$scope', '$window', 'sources', 'contributors', 'dashifTestVectors', function ($scope, $window, sources, contributors, dashifTestVectors) {
     $scope.selectedItem = {
-        url: 'https://udpcc-shh2.dfshan.net:8000/video1/manifest.mpd'
+        url: 'https://udpcc-pek3.dfshan.net:8000/video/manifest.mpd'
         // url: 'https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd'
     };
 
@@ -84,7 +90,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             placement: 'outsideGrid',
             container: '#legend-wrapper',
             labelFormatter: function (label, series) {
-                return '<div  style="cursor: pointer;" id="' + series.type + '.' + series.id + '" onclick="legendLabelClickHandler(this)">' + label + '</div>';
+                return '<div  style="cursor: pointer;font-size: 24px;" id="' + series.type + '.' + series.id + '" onclick="legendLabelClickHandler(this)">' + label + '</div>';
             }
         },
         series: {
@@ -147,14 +153,15 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             latency: { data: [], selected: false, color: '#326e88', label: 'Audio Latency (ms)' },
             droppedFPS: { data: [], selected: false, color: '#004E64', label: 'Audio Dropped FPS' },
             mtp: { data: [], selected: false, color: '#FFC400', label: 'Measured throughput (kpbs)' },
+            mtpFromXquic: { data: [], selected: false, color: '#1712B3', label: '带宽估计(传输层) (kpbs)' },
             etp: { data: [], selected: false, color: '#1712B3', label: 'Estimated throughput (kpbs)' },
             liveLatency: { data: [], selected: false, color: '#65080c', label: 'Live Latency' },
             playbackRate: { data: [], selected: false, color: '#65080c', label: 'Playback Rate' }
         },
         video: {
             buffer: { data: [], selected: false, color: '#00589d', label: 'Video Buffer Level' },
-            bitrate: { data: [], selected: true, color: '#ff7900', label: 'Video Bitrate (kbps)' },
-            rebufferTime: { data: [], selected: true, color: '#326e88', label: 'Rebuffer Time (ms)' },
+            bitrate: { data: [], selected: true, color: '#ff7900', label: '单个视频块清晰度 (kbps)' },
+            rebufferTime: { data: [], selected: false, color: '#326e88', label: '卡顿时间 (s)' },
             averageBitrate: { data: [], selected: false, color: '#00CCBE', label: 'Average Bitrate (kbps)' },
             index: { data: [], selected: false, color: '#326e88', label: 'Video Current Quality' },
             pendingIndex: { data: [], selected: false, color: '#44c248', label: 'Video Pending Index' },
@@ -162,8 +169,9 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             download: { data: [], selected: false, color: '#FF6700', label: 'Video Download Time (sec)' },
             latency: { data: [], selected: false, color: '#329d61', label: 'Video Latency (ms)' },
             droppedFPS: { data: [], selected: false, color: '#65080c', label: 'Video Dropped FPS' },
-            mtp: { data: [], selected: false, color: '#FFC400', label: 'Measured throughput (kpbs)' },
-            etp: { data: [], selected: false, color: '#1712B3', label: 'Estimated throughput (kpbs)' },
+            mtp: { data: [], selected: true, color: '#FFC400', label: '带宽估计(应用层) (kpbs)' },
+            mtpFromXquic: { data: [], selected: true, color: '#1712B3', label: '带宽估计(传输层) (kbps)' },
+            etp: { data: [], selected: false, color: '#1712B3', label: 'Estimated throughput (kbps)' },
             liveLatency: { data: [], selected: false, color: '#65080c', label: 'Live Latency' },
             playbackRate: { data: [], selected: false, color: '#65080c', label: 'Playback Rate' }
         }
@@ -263,6 +271,8 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
 
     // metrics
     $scope.videoBitrate = 0;
+    $scope.videoRebufferTime = 0;
+    $scope.videoAverageBitrate = 0;
     $scope.videoIndex = 0;
     $scope.videoPendingIndex = 0;
     $scope.videoPendingMaxIndex = 0;
@@ -276,6 +286,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.videoRatioCount = 0;
     $scope.videoRatio = '';
     $scope.videoMtp = 0;
+    $scope.videoMtpFromXquic = 0;
     $scope.videoEtp = 0;
     $scope.videoLiveLatency = 0;
     $scope.videoPlaybackRate = 1.00;
@@ -303,7 +314,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.autoLoadSelected = false;
     $scope.muted = false;
     $scope.cmcdEnabled = false;
-    $scope.cmsdEnabled = false;
+    $scope.cmsdEnabled = true;
     $scope.cmsdApplyMb = false;
     $scope.cmsdEtpWeightRatio = 0;
     $scope.loopSelected = false;
@@ -351,8 +362,10 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.smoothness = 0;
     $scope.lastQuality = -1;
 
-    $scope.sumBitrate = 0;
+    $scope.requestIndex = 0;
     $scope.averageBitrate = 0;
+
+    $scope.mtpFromXquic = 0;
 
     ////////////////////////////////////////
     //
@@ -435,7 +448,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.controlbar.initialize();
     $scope.controlbar.disable();
     $scope.version = $scope.player.getVersion();
-    $scope.str = 'dash.js默认算法+QUIC';
+    // $scope.str = 'prophet + AR + Google BBR';
 
     $scope.player.on(dashjs.MediaPlayer.events.MANIFEST_LOADED, function (e) { /* jshint ignore:line */
         $scope.isDynamic = e.data.type === 'dynamic';
@@ -536,14 +549,14 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         var bufferLevel = dashMetrics.getCurrentBufferLevel(e.request.mediaType, true);
         let bitrates = $scope.player.getBitrateInfoListFor('video');
         if (e.request.mediaType == 'video' && e.request.index >= 0) {
+            $scope.requestIndex = e.request.index;
             let quality = bitrates[e.request.quality].bitrate / 1000;
-            $scope.sumBitrate += quality;
-            $scope.averageBitrate = $scope.sumBitrate / e.request.index;
-            console.log('quality',quality,'index',e.request.index);
             if ($scope.lastQuality < 0) {
                 $scope.lastQuality = quality;
             }
             $scope.qualitySum += quality;
+            $scope.averageBitrate = $scope.qualitySum / (e.request.index + 1);
+            console.log('qualitySum',$scope.qualitySum,'index',e.request.index,'averageBitrate',$scope.averageBitrate);
             $scope.smoothness += Math.abs(quality - $scope.lastQuality);
             $scope.lastQuality = quality;
             console.log('new chunk quality:', quality+'('+e.request.quality+')', 'qualitySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness);
@@ -635,9 +648,11 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         if ($scope.customABRRulesSelected) {
             $scope.player.addABRCustomRule('qualitySwitchRules', 'DownloadRatioRule', DownloadRatioRule); /* jshint ignore:line */
             $scope.player.addABRCustomRule('qualitySwitchRules', 'ThroughputRule', CustomThroughputRule); /* jshint ignore:line */
+            // $scope.player.addABRCustomRule('qualitySwitchRules', 'ProphetRule', ProphetRule); /* jshint ignore:line */
         } else {
             $scope.player.removeABRCustomRule('DownloadRatioRule');
             $scope.player.removeABRCustomRule('ThroughputRule');
+            // $scope.player.removeABRCustomRule('ProphetRule');
         }
     };
 
@@ -1177,6 +1192,33 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         $scope.player.updateSettings({ streaming: { text: { defaultEnabled: $scope.initialSettings.textEnabled } } });
         $scope.player.enableForcedTextStreaming($scope.initialSettings.forceTextStreaming);
         $scope.controlbar.enable();
+
+        $scope.updateMetricsFromXquic = function() {
+            const regex = /\|bw:(\d+\.\d+)\|loss:(\d+\.\d+)\|rtt:(\d+)\|pto:(\d+)\|rto:(\d+)\|/;
+            fetch('https://udpcc-pek3.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
+                .then(function(response) {
+                    return response.text();
+                })
+                .then(function(data) {
+                    let test = data;
+                    const match = test.match(regex);
+    
+                    if (match) {
+                        if (parseFloat(match[1], 10) / 1000 < 3000) {
+                            window.bandwidth_xquic = parseFloat(match[1], 10) / 1000;
+                            $scope.mtpFromXquic = window.bandwidth_xquic;
+                            window.loss_xquic = parseFloat(match[2], 10);
+                            window.rtt_xquic = parseInt(match[3], 10) / 1000;
+                            window.pto_xquic = parseInt(match[4], 10) / 1000;
+                            window.rto_xquic = parseInt(match[5], 10) / 1000;
+                        }
+                    }
+                    console.log(bandwidth_xquic, loss_xquic, rtt_xquic, pto_xquic, rto_xquic);
+                    console.log('Modified request successful:', test);
+                })
+            setTimeout($scope.updateMetricsFromXquic, 1000);
+        }
+        $scope.updateMetricsFromXquic();
     };
 
     $scope.doStop = function () {
@@ -2075,6 +2117,9 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                 // if (data.length > $scope.maxPointsToChart) {
                 //     data.splice(0, 1);
                 // }
+                if ($scope.requestIndex >= 96) {
+                    $scope.chartEnabled = !$scope.chartEnabled;
+                }
             }
         }
     };
@@ -2098,9 +2143,18 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                 type: type
             };
             $scope.chartData.push(data);
-            $scope.chartOptions.yaxes.push({
-                axisLabel: data.label
-            });
+            if (id === "bitrate" || id === "mtp" || id === "mtpFromXquic") {
+                $scope.chartOptions.yaxes.push({
+                    axisLabel: data.label,
+                    min: 0,
+                    max: 2500
+                });
+            }
+            else {
+                $scope.chartOptions.yaxes.push({
+                    axisLabel: data.label
+                });
+            }
         } else { //remove stat item from charts
             for (var i = 0; i < $scope.chartData.length; i++) {
                 if ($scope.chartData[i].id === id && $scope.chartData[i].type === type) {
@@ -2152,6 +2206,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             $scope[type + 'DroppedFrames'] = droppedFPS;
             $scope[type + 'LiveLatency'] = liveLatency;
             $scope[type + 'PlaybackRate'] = playbackRate;
+            $scope[type + 'MtpFromXquic'] = $scope.mtpFromXquic;
 
             var httpMetrics = calculateHTTPMetrics(type, dashMetrics.getHttpRequests(type));
             if (httpMetrics) {
@@ -2159,7 +2214,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                 $scope[type + 'Latency'] = httpMetrics.latency[type].low.toFixed(2) + ' | ' + httpMetrics.latency[type].average.toFixed(2) + ' | ' + httpMetrics.latency[type].high.toFixed(2);
                 $scope[type + 'Ratio'] = httpMetrics.ratio[type].low.toFixed(2) + ' | ' + httpMetrics.ratio[type].average.toFixed(2) + ' | ' + httpMetrics.ratio[type].high.toFixed(2);
                 $scope[type + 'Etp'] = (httpMetrics.etp[type] / 1000).toFixed(3);
-                $scope[type + 'Mtp'] = (mtp / 1000).toFixed(3);
+                $scope[type + 'Mtp'] = (mtp).toFixed(3);
             }
 
             if ($scope.chartCount % 2 === 0) {
@@ -2178,7 +2233,8 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                     $scope.plotPoint('latency', type, httpMetrics.latency[type].average.toFixed(2), time);
                     $scope.plotPoint('ratio', type, httpMetrics.ratio[type].average.toFixed(2), time);
                     $scope.plotPoint('etp', type, (httpMetrics.etp[type] / 1000).toFixed(3), time);
-                    $scope.plotPoint('mtp', type, (mtp / 1000).toFixed(3), time);
+                    $scope.plotPoint('mtp', type, (mtp).toFixed(3), time);
+                    $scope.plotPoint('mtpFromXquic', type, $scope.mtpFromXquic, time);
                 }
                 $scope.safeApply();
             }
@@ -2249,6 +2305,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         $scope.fastSwitchSelected = currentConfig.streaming.buffer.fastSwitchEnabled;
         $scope.videoAutoSwitchSelected = currentConfig.streaming.abr.autoSwitchBitrate.video;
         $scope.customABRRulesSelected = !currentConfig.streaming.abr.useDefaultABRRules;
+        $scope.toggleUseCustomABRRules();
     }
 
     function setDrmOptions() {
@@ -2359,6 +2416,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         $scope.cmsdEnabled = currentConfig.streaming.cmsd.enabled;
         $scope.cmsdApplyMb = currentConfig.streaming.cmsd.abr.applyMb;
         $scope.cmsdEtpWeightRatio = currentConfig.streaming.cmsd.abr.etpWeightRatio;
+        $scope.toggleCmsdEnabled();
     }
 
     function getUrlVars() {
@@ -2388,6 +2446,29 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                     'streaming': {
                         'buffer': {
                             'fastSwitchEnabled': $scope.fastSwitchSelected
+                        }
+                    }
+                });
+                $scope.player.updateSettings({
+                    'streaming': {
+                        'abr': {
+                            'useDefaultABRRules': true
+                        }
+                    }
+                });
+                $scope.player.updateSettings({
+                    streaming: {
+                        cmsd: {
+                            enabled: true
+                        }
+                    }
+                });
+                $scope.player.updateSettings({
+                    'streaming': {
+                        'abr': {
+                            'initialBitrate': {
+                                'video': 1200
+                            }
                         }
                     }
                 });

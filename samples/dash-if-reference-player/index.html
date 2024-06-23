@@ -34,6 +34,7 @@
     <script src="app/main.js"></script>
     <script src="app/rules/DownloadRatioRule.js"></script>
     <script src="app/rules/ThroughputRule.js"></script>
+    <!-- <script src="app/rules/ProphetRule.js"></script> -->
     <script src="alignVideoPlayTime.js"></script>
 
     <!-- Google Cast -->
@@ -78,23 +79,12 @@
             <!-- <a href="http://dashif.org/" target="_blank"><img class="image" src="app/img/if.png"/></a> -->
             <!-- <span id="big-title">Reference Client</span> -->
             <!-- <span ng-bind="version"></span> -->
-            <!-- <span id="big-title">dash.js默认算法+QUIC</span> -->
+            <!-- <span id="big-title">prophet+QUIC</span> -->
             <!-- <span ng-bind="str"></span> -->
-            <h1 class="footer-text" style="color: red; font-weight: bold;">IETF QUIC + Google BBR</h1>
+            <h1 class="footer-text" style="color: red; font-weight: bold;">BOLA + IETF QUIC + Google BBR</h1>
             <span id="commit-info"><!-- commit-info --></span>
         </div>
 
-        <!-- Using iframe to solve pre-flight request issue from GIT-->
-        <!-- <div class="top-buttons">
-            <iframe id="star-button"
-                    src="//ghbtns.com/github-btn.html?user=Dash-Industry-Forum&repo=dash.js&type=watch&count=true&size=large"
-                    height="30" width="150">
-            </iframe>
-            <iframe id="fork-button"
-                    src="//ghbtns.com/github-btn.html?user=Dash-Industry-Forum&repo=dash.js&type=fork&count=true&size=large"
-                    height="30" width="150">
-            </iframe>
-        </div> -->
     </div>
     <div class="row">
         <div class="input-group">
@@ -981,8 +971,8 @@
             <div>
                 <ul class="nav nav-tabs" role="tablist">
                     <li class="active">
-                        <a href="#videoStatsTab" role="tab" data-toggle="tab">
-                            Video
+                        <a href="#videoStatsTab" role="tab" data-toggle="tab" style="font-size: 28px;">
+                            视频
                         </a>
                     </li>
                 </ul>
@@ -992,40 +982,40 @@
                     <div class="tab-pane fade active in" id="videoStatsTab">
                         <div class="panel-body panel-stats" ng-cloak>
                             <!-- VIDEO STATS ITEMS-->
-                            <div class="text-success">
+                            <!-- <div class="text-success">
                                 <input id="videoBufferCB" type="checkbox" ng-model="chartState.video.buffer.selected"
                                        ng-change="enableChartByName('buffer', 'video')">
                                 <label class="text-primary" for="videoBufferCB" data-toggle="tooltip"
                                        data-placement="top"
-                                       title="The length of the forward buffer, in seconds">Buffer Length : </label> {{videoBufferLength}}
-                            </div>
+                                       title="The length of the forward buffer, in seconds">Buffer Length : </label> {{videoBufferLength}} s
+                            </div> -->
 
                             <div class="text-success">
                                 <input id="videoBitrateCB" type="checkbox" ng-model="chartState.video.bitrate.selected"
-                                       ng-change="enableChartByName('bitrate', 'video')">
+                                       ng-change="enableChartByName('bitrate', 'video')" class="checkbox-large">
                                 <label class="text-primary" for="videoBitrateCB" data-toggle="tooltip"
                                        data-placement="top"
-                                       title="The bitrate of the representation being downloaded">Bitrate Downloading
-                                    :</label> {{videoBitrate}} kbps
+                                       title="The bitrate of the representation being downloaded" style="font-size: 24px;">单个视频清晰度
+                                    :</label> <span style="font-size: 24px;">{{videoBitrate | number:0}} kbps</span>
                             </div>
 
                             <div class="text-success">
                                 <input id="averageVideoBitrateCB" type="checkbox" ng-model="chartState.video.averageBitrate.selected"
-                                       ng-change="enableChartByName('averageBitrate', 'video')">
+                                       ng-change="enableChartByName('averageBitrate', 'video')" class="checkbox-large">
                                 <label class="text-primary" for="averageVideoBitrateCB" data-toggle="tooltip"
                                        data-placement="top"
-                                       title="The average bitrate of the representation downloaded">Average Bitrate
-                                    :</label> {{videoAverageBitrate}} kbps
+                                       title="The average bitrate of the representation downloaded" style="font-size: 24px;">视频平均清晰度
+                                    :</label> <span style="font-size: 24px;">{{videoAverageBitrate | number:0}} kbps</span>
                             </div>
 
-                            <div class="text-success">
+                            <!-- <div class="text-success">
                                 <input id="videoRebufferTimeCB" type="checkbox" ng-model="chartState.video.rebufferTime.selected"
-                                       ng-change="enableChartByName('rebufferTime', 'video')">
+                                       ng-change="enableChartByName('rebufferTime', 'video')" class="checkbox-large">
                                 <label class="text-primary" for="videoRebufferTimeCB" data-toggle="tooltip"
                                        data-placement="top"
-                                       title="The total rebuffer time of the video">Rebuffer Time
-                                    :</label> {{videoRebufferTime}} s
-                            </div>
+                                       title="The total rebuffer time of the video" style="font-size: 24px;">卡顿时间
+                                    :</label> <span style="font-size: 24px;">{{videoRebufferTime | number:2}} s</span>
+                            </div> -->
 
                             <!-- <div class="text-success">
                                 <input id="videoPendingIndexCB" type="checkbox"
@@ -1043,6 +1033,83 @@
                                        data-placement="top"
                                        title="The representation index being rendered.">Index playing
                                     :</label> {{videoIndex}} / {{videoMaxIndex}}
+                            </div>
+                            <div class="text-success">
+                                <input id="videoDroppedFramesCB" type="checkbox"
+                                       ng-model="chartState.video.droppedFPS.selected"
+                                       ng-change="enableChartByName('droppedFPS', 'video')">
+                                <label class="text-primary" for="videoDroppedFramesCB" data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="The absolute count of frames dropped by the rendering pipeline since play commenced">Dropped
+                                    Frames :</label> {{videoDroppedFrames}}
+                            </div>
+                            <div class="text-success">
+                                <input id="videoLatencyCB" type="checkbox" ng-model="chartState.video.latency.selected"
+                                       ng-change="enableChartByName('latency', 'video')">
+                                <label class="text-primary" for="videoLatencyCB" data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="The minimum, average and maximum latency over the last 4 requested segments. Latency is the time in seconds from request of segment to receipt of first byte">Latency
+                                    (min|avg|max) :</label> {{videoLatency}}
+                            </div>
+                            <div class="text-success">
+                                <input id="videoDownloadCB" type="checkbox"
+                                       ng-model="chartState.video.download.selected"
+                                       ng-change="enableChartByName('download', 'video')">
+                                <label class="text-primary" for="videoDownloadCB" data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="The minimum, average and maximum download time for the last 4 requested segments. Download time is the time in seconds from first byte being received to the last byte">Download
+                                    (min|avg|max) :</label> {{videoDownload}}
+                            </div>
+                            <div class="text-success">
+                                <input id="videoRatioCB" type="checkbox" ng-model="chartState.video.ratio.selected"
+                                       ng-change="enableChartByName('ratio', 'video')">
+                                <label class="text-primary" for="videoRatioCB" data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="The minimum, average and maximum ratio of the segment playback time to total download time over the last 4 segments">Ratio
+                                    (min|avg|max) :</label> {{videoRatio}}
+                            </div> -->
+                            <div class="text-success" ng-show="isCMSDEnabled()">
+                                <input id="mtpCB" type="checkbox"
+                                       ng-model="chartState.video.mtp.selected"
+                                       ng-change="enableChartByName('mtp', 'video')" class="checkbox-large">
+                                <label class="text-primary" for="mtpCB" data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="The measured (averaged) throughput computed in the ABR logic" style="font-size: 24px;">带宽估计(应用层):
+                                    </label> <span style="font-size: 24px;">{{videoMtp | number:0}} kbps</span>
+                            </div>
+                            <div class="text-success" ng-show="isCMSDEnabled()">
+                                <input id="mtpFromXquicCB" type="checkbox"
+                                       ng-model="chartState.video.mtpFromXquic.selected"
+                                       ng-change="enableChartByName('mtpFromXquic', 'video')" class="checkbox-large">
+                                <label class="text-primary" for="mtpFromXquicCB" data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="The measured (averaged) throughput computed in the ABR logic" style="font-size: 24px;">带宽估计(传输层):
+                                    </label> <span style="font-size: 24px;">{{videoMtpFromXquic | number:0}} kbps</span>
+                            </div>
+                            <!-- <div class="text-success" ng-show="isCMSDEnabled()">
+                                <input id="etpCB" type="checkbox"
+                                       ng-model="chartState.video.etp.selected"
+                                       ng-change="enableChartByName('etp', 'video')">
+                                <label class="text-primary" for="etpCB" data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="The estimated throughput return by CMSD response headers">Estimated throughput:</label> {{videoEtp}} Mbps
+                            </div> -->
+                            <!-- <div class="text-success" ng-show="isDynamic">
+                                <input id="liveLatencyCB" type="checkbox"
+                                       ng-model="chartState.video.liveLatency.selected"
+                                       ng-change="enableChartByName('liveLatency', 'video')">
+                                <label class="text-primary" for="liveLatencyCB" data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="Difference between live time and current playback position in seconds. This latency estimate does not include the time taken by the encoder to encode the content">Live
+                                    Latency:</label> {{videoLiveLatency}}
+                            </div>
+                            <div class="text-success" ng-show="isDynamic">
+                                <input id="videoPlaybackRateCB" type="checkbox"
+                                       ng-model="chartState.video.playbackRate.selected"
+                                       ng-change="enableChartByName('playbackRate', 'video')">
+                                <label class="text-primary" data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="Playback rate">Playback rate:</label> {{videoPlaybackRate}}
                             </div> -->
                         </div>
                     </div>

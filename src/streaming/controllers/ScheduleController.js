@@ -28,14 +28,14 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
-import Constants from '../constants/Constants';
-import FragmentModel from '../models/FragmentModel';
-import EventBus from '../../core/EventBus';
-import Events from '../../core/events/Events';
-import FactoryMaker from '../../core/FactoryMaker';
 import Debug from '../../core/Debug';
-import MetricsConstants from '../constants/MetricsConstants';
+import EventBus from '../../core/EventBus';
+import FactoryMaker from '../../core/FactoryMaker';
+import Events from '../../core/events/Events';
 import MediaPlayerEvents from '../MediaPlayerEvents';
+import Constants from '../constants/Constants';
+import MetricsConstants from '../constants/MetricsConstants';
+import FragmentModel from '../models/FragmentModel';
 
 function ScheduleController(config) {
 
@@ -145,11 +145,23 @@ function ScheduleController(config) {
 
             if (_shouldScheduleNextRequest()) {
                 let qualityChange = false;
+                // if (type === 'video') {
+                //     console.log('111',representationController.getCurrentRepresentationInfo());
+                // }
                 if (checkPlaybackQuality) {
+                    // if (type === 'video') {
+                    //     console.log('111',representationController.getCurrentRepresentationInfo());
+                    // }
                     // in case the playback quality is supposed to be changed, the corresponding StreamProcessor will update the currentRepresentation.
                     // The StreamProcessor will also start the schedule timer again once the quality switch has beeen prepared. Consequently, we only call _getNextFragment if the quality is not changed.
                     qualityChange = abrController.checkPlaybackQuality(type, streamInfo.id);
+                    // if (type === 'video') {
+                    //     console.log('222',representationController.getCurrentRepresentationInfo());
+                    // }
                 }
+                // if (type === 'video') {
+                //     console.log('333',representationController.getCurrentRepresentationInfo());
+                // }
                 if (!qualityChange) {
                     _getNextFragment();
                 }
@@ -168,7 +180,6 @@ function ScheduleController(config) {
      */
     function _getNextFragment() {
         const currentRepresentationInfo = representationController.getCurrentRepresentationInfo();
-
         // A quality changed occured or we are switching the AdaptationSet. In that case we need to load a new init segment
         if (initSegmentRequired || currentRepresentationInfo.quality !== lastInitializedQuality || switchTrack) {
             if (switchTrack) {

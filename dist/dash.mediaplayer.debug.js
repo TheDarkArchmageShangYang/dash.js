@@ -29944,14 +29944,14 @@ PlaybackController.__dashjs_factory_name = 'PlaybackController';
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _constants_Constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants/Constants */ "./src/streaming/constants/Constants.js");
-/* harmony import */ var _models_FragmentModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../models/FragmentModel */ "./src/streaming/models/FragmentModel.js");
-/* harmony import */ var _core_EventBus__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../core/EventBus */ "./src/core/EventBus.js");
+/* harmony import */ var _core_Debug__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../core/Debug */ "./src/core/Debug.js");
+/* harmony import */ var _core_EventBus__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../core/EventBus */ "./src/core/EventBus.js");
+/* harmony import */ var _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../core/FactoryMaker */ "./src/core/FactoryMaker.js");
 /* harmony import */ var _core_events_Events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../core/events/Events */ "./src/core/events/Events.js");
-/* harmony import */ var _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../core/FactoryMaker */ "./src/core/FactoryMaker.js");
-/* harmony import */ var _core_Debug__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../core/Debug */ "./src/core/Debug.js");
+/* harmony import */ var _MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../MediaPlayerEvents */ "./src/streaming/MediaPlayerEvents.js");
+/* harmony import */ var _constants_Constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../constants/Constants */ "./src/streaming/constants/Constants.js");
 /* harmony import */ var _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../constants/MetricsConstants */ "./src/streaming/constants/MetricsConstants.js");
-/* harmony import */ var _MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../MediaPlayerEvents */ "./src/streaming/MediaPlayerEvents.js");
+/* harmony import */ var _models_FragmentModel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../models/FragmentModel */ "./src/streaming/models/FragmentModel.js");
 /**
  * The copyright in this software is being made available under the BSD License,
  * included below. This software may be subject to other third party and contributor
@@ -29994,7 +29994,7 @@ __webpack_require__.r(__webpack_exports__);
 function ScheduleController(config) {
   config = config || {};
   var context = this.context;
-  var eventBus = (0,_core_EventBus__WEBPACK_IMPORTED_MODULE_2__["default"])(context).getInstance();
+  var eventBus = (0,_core_EventBus__WEBPACK_IMPORTED_MODULE_1__["default"])(context).getInstance();
   var dashMetrics = config.dashMetrics;
   var mediaPlayerModel = config.mediaPlayerModel;
   var fragmentModel = config.fragmentModel;
@@ -30008,7 +30008,7 @@ function ScheduleController(config) {
   var instance, streamInfo, logger, timeToLoadDelay, scheduleTimeout, hasVideoTrack, lastFragmentRequest, topQualityIndex, lastInitializedQuality, switchTrack, initSegmentRequired, managedMediaSourceAllowsRequest, checkPlaybackQuality;
 
   function setup() {
-    logger = (0,_core_Debug__WEBPACK_IMPORTED_MODULE_5__["default"])(context).getInstance().getLogger(instance);
+    logger = (0,_core_Debug__WEBPACK_IMPORTED_MODULE_0__["default"])(context).getInstance().getLogger(instance);
     resetInitialSettings();
     streamInfo = config.streamInfo;
   }
@@ -30016,11 +30016,11 @@ function ScheduleController(config) {
   function initialize(_hasVideoTrack) {
     hasVideoTrack = _hasVideoTrack;
     eventBus.on(_core_events_Events__WEBPACK_IMPORTED_MODULE_3__["default"].URL_RESOLUTION_FAILED, _onURLResolutionFailed, instance);
-    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].PLAYBACK_STARTED, _onPlaybackStarted, instance);
-    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].PLAYBACK_RATE_CHANGED, _onPlaybackRateChanged, instance);
-    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].PLAYBACK_TIME_UPDATED, _onPlaybackTimeUpdated, instance);
-    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].MANAGED_MEDIA_SOURCE_START_STREAMING, _onManagedMediaSourceStartStreaming, instance);
-    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].MANAGED_MEDIA_SOURCE_END_STREAMING, _onManagedMediaSourceEndStreaming, instance);
+    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].PLAYBACK_STARTED, _onPlaybackStarted, instance);
+    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].PLAYBACK_RATE_CHANGED, _onPlaybackRateChanged, instance);
+    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].PLAYBACK_TIME_UPDATED, _onPlaybackTimeUpdated, instance);
+    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].MANAGED_MEDIA_SOURCE_START_STREAMING, _onManagedMediaSourceStartStreaming, instance);
+    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].MANAGED_MEDIA_SOURCE_END_STREAMING, _onManagedMediaSourceEndStreaming, instance);
   }
 
   function _onManagedMediaSourceStartStreaming() {
@@ -30083,13 +30083,23 @@ function ScheduleController(config) {
       }
 
       if (_shouldScheduleNextRequest()) {
-        var qualityChange = false;
+        var qualityChange = false; // if (type === 'video') {
+        //     console.log('111',representationController.getCurrentRepresentationInfo());
+        // }
 
         if (checkPlaybackQuality) {
+          // if (type === 'video') {
+          //     console.log('111',representationController.getCurrentRepresentationInfo());
+          // }
           // in case the playback quality is supposed to be changed, the corresponding StreamProcessor will update the currentRepresentation.
           // The StreamProcessor will also start the schedule timer again once the quality switch has beeen prepared. Consequently, we only call _getNextFragment if the quality is not changed.
-          qualityChange = abrController.checkPlaybackQuality(type, streamInfo.id);
-        }
+          qualityChange = abrController.checkPlaybackQuality(type, streamInfo.id); // if (type === 'video') {
+          //     console.log('222',representationController.getCurrentRepresentationInfo());
+          // }
+        } // if (type === 'video') {
+        //     console.log('333',representationController.getCurrentRepresentationInfo());
+        // }
+
 
         if (!qualityChange) {
           _getNextFragment();
@@ -30146,7 +30156,7 @@ function ScheduleController(config) {
 
   function _shouldClearScheduleTimer() {
     try {
-      return type === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT && !textController.isTextEnabled() || playbackController.isPaused() && (!playbackController.getStreamController().getInitialPlayback() || !playbackController.getStreamController().getAutoPlay()) && !settings.get().streaming.scheduling.scheduleWhilePaused;
+      return type === _constants_Constants__WEBPACK_IMPORTED_MODULE_5__["default"].TEXT && !textController.isTextEnabled() || playbackController.isPaused() && (!playbackController.getStreamController().getInitialPlayback() || !playbackController.getStreamController().getAutoPlay()) && !settings.get().streaming.scheduling.scheduleWhilePaused;
     } catch (e) {
       return false;
     }
@@ -30201,9 +30211,9 @@ function ScheduleController(config) {
       return bufferTarget;
     }
 
-    if (type === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT) {
+    if (type === _constants_Constants__WEBPACK_IMPORTED_MODULE_5__["default"].TEXT) {
       bufferTarget = _getBufferTargetForFragmentedText();
-    } else if (type === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].AUDIO && hasVideoTrack) {
+    } else if (type === _constants_Constants__WEBPACK_IMPORTED_MODULE_5__["default"].AUDIO && hasVideoTrack) {
       bufferTarget = _getBufferTargetForAudio();
     } else {
       bufferTarget = _getGenericBufferTarget();
@@ -30249,7 +30259,7 @@ function ScheduleController(config) {
 
   function _getBufferTargetForAudio() {
     try {
-      var videoBufferLevel = dashMetrics.getCurrentBufferLevel(_constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].VIDEO);
+      var videoBufferLevel = dashMetrics.getCurrentBufferLevel(_constants_Constants__WEBPACK_IMPORTED_MODULE_5__["default"].VIDEO);
       var currentRepresentationInfo = representationController.getCurrentRepresentationInfo(); // For multiperiod we need to consider that audio and video segments might have different durations.
       // This can lead to scenarios in which we completely buffered the video segments and the video buffer level for the current period is not changing anymore. However we might still need a small audio segment to finish buffering audio as well.
       // If we set the buffer time of audio equal to the video buffer time scheduling for the remaining audio segment will only be triggered when audio fragmentDuration > videoBufferLevel. That will delay preloading of the upcoming period.
@@ -30302,7 +30312,7 @@ function ScheduleController(config) {
   function _completeQualityChange(trigger) {
     if (playbackController && fragmentModel) {
       var item = fragmentModel.getRequests({
-        state: _models_FragmentModel__WEBPACK_IMPORTED_MODULE_1__["default"].FRAGMENT_MODEL_EXECUTED,
+        state: _models_FragmentModel__WEBPACK_IMPORTED_MODULE_7__["default"].FRAGMENT_MODEL_EXECUTED,
         time: playbackController.getTime(),
         threshold: 0
       })[0];
@@ -30390,11 +30400,11 @@ function ScheduleController(config) {
 
   function reset() {
     eventBus.off(_core_events_Events__WEBPACK_IMPORTED_MODULE_3__["default"].URL_RESOLUTION_FAILED, _onURLResolutionFailed, instance);
-    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].PLAYBACK_STARTED, _onPlaybackStarted, instance);
-    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].PLAYBACK_RATE_CHANGED, _onPlaybackRateChanged, instance);
-    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].PLAYBACK_TIME_UPDATED, _onPlaybackTimeUpdated, instance);
-    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].MANAGED_MEDIA_SOURCE_START_STREAMING, _onManagedMediaSourceStartStreaming, instance);
-    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].MANAGED_MEDIA_SOURCE_END_STREAMING, _onManagedMediaSourceEndStreaming, instance);
+    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].PLAYBACK_STARTED, _onPlaybackStarted, instance);
+    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].PLAYBACK_RATE_CHANGED, _onPlaybackRateChanged, instance);
+    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].PLAYBACK_TIME_UPDATED, _onPlaybackTimeUpdated, instance);
+    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].MANAGED_MEDIA_SOURCE_START_STREAMING, _onManagedMediaSourceStartStreaming, instance);
+    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].MANAGED_MEDIA_SOURCE_END_STREAMING, _onManagedMediaSourceEndStreaming, instance);
     clearScheduleTimer();
 
     _completeQualityChange(false);
@@ -30429,7 +30439,7 @@ function ScheduleController(config) {
 }
 
 ScheduleController.__dashjs_factory_name = 'ScheduleController';
-/* harmony default export */ __webpack_exports__["default"] = (_core_FactoryMaker__WEBPACK_IMPORTED_MODULE_4__["default"].getClassFactory(ScheduleController));
+/* harmony default export */ __webpack_exports__["default"] = (_core_FactoryMaker__WEBPACK_IMPORTED_MODULE_2__["default"].getClassFactory(ScheduleController));
 
 /***/ }),
 
@@ -39214,8 +39224,8 @@ function ABRRulesCollection(config) {
       if (req.quality !== _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE) {
         // We only use the new quality in case it is lower than the already saved one or if no new quality has been selected for the respective priority
         if (values[req.priority].quality === _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE || values[req.priority].quality > req.quality) {
-          // req.quality = req.quality > 7 ? 7 : req.quality;
-          // req.quality = req.quality < 4 ? 4 : req.quality;
+          req.quality = Math.max(5, req.quality); // req.quality = req.quality < 4 ? 4 : req.quality;
+
           values[req.priority].quality = req.quality;
           values[req.priority].reason = req.reason || null;
         }

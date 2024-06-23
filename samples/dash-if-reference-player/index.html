@@ -81,7 +81,7 @@
             <!-- <span ng-bind="version"></span> -->
             <!-- <span id="big-title">prophet+QUIC</span> -->
             <!-- <span ng-bind="str"></span> -->
-            <h1 class="footer-text" style="color: red; font-weight: bold;">BOLA + IETF QUIC + Google BBR</h1>
+            <h1 class="footer-text" style="color: red; font-weight: bold;">BOLA + IETF QUIC</h1>
             <span id="commit-info"><!-- commit-info --></span>
         </div>
 
@@ -995,7 +995,7 @@
                                        ng-change="enableChartByName('bitrate', 'video')" class="checkbox-large">
                                 <label class="text-primary" for="videoBitrateCB" data-toggle="tooltip"
                                        data-placement="top"
-                                       title="The bitrate of the representation being downloaded" style="font-size: 24px;">单个视频清晰度
+                                       title="The bitrate of the representation being downloaded" style="font-size: 24px;">单个视频块清晰度
                                     :</label> <span style="font-size: 24px;">{{videoBitrate | number:0}} kbps</span>
                             </div>
 
@@ -1074,10 +1074,10 @@
                                        ng-change="enableChartByName('mtp', 'video')" class="checkbox-large">
                                 <label class="text-primary" for="mtpCB" data-toggle="tooltip"
                                        data-placement="top"
-                                       title="The measured (averaged) throughput computed in the ABR logic" style="font-size: 24px;">带宽估计(应用层):
+                                       title="The measured (averaged) throughput computed in the ABR logic" style="font-size: 24px;">带宽估计:
                                     </label> <span style="font-size: 24px;">{{videoMtp | number:0}} kbps</span>
                             </div>
-                            <div class="text-success" ng-show="isCMSDEnabled()">
+                            <!-- <div class="text-success" ng-show="isCMSDEnabled()">
                                 <input id="mtpFromXquicCB" type="checkbox"
                                        ng-model="chartState.video.mtpFromXquic.selected"
                                        ng-change="enableChartByName('mtpFromXquic', 'video')" class="checkbox-large">
@@ -1085,7 +1085,7 @@
                                        data-placement="top"
                                        title="The measured (averaged) throughput computed in the ABR logic" style="font-size: 24px;">带宽估计(传输层):
                                     </label> <span style="font-size: 24px;">{{videoMtpFromXquic | number:0}} kbps</span>
-                            </div>
+                            </div> -->
                             <!-- <div class="text-success" ng-show="isCMSDEnabled()">
                                 <input id="etpCB" type="checkbox"
                                        ng-model="chartState.video.etp.selected"

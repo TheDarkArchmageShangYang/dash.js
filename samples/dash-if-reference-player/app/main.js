@@ -41,7 +41,7 @@ angular.module('DashIFTestVectorsService', ['ngResource']).factory('dashifTestVe
 
 app.controller('DashController', ['$scope', '$window', 'sources', 'contributors', 'dashifTestVectors', function ($scope, $window, sources, contributors, dashifTestVectors) {
     $scope.selectedItem = {
-        url: 'https://udpcc-pek3.dfshan.net:8000/video/manifest.mpd'
+        url: 'https://udpcc-pek2.dfshan.net:8000/video/manifest.mpd'
         // url: 'https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd'
     };
 
@@ -160,7 +160,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         },
         video: {
             buffer: { data: [], selected: false, color: '#00589d', label: 'Video Buffer Level' },
-            bitrate: { data: [], selected: true, color: '#ff7900', label: '单个视频块清晰度 (kbps)' },
+            bitrate: { data: [], selected: true, color: '#ff0000', label: '单个视频块清晰度 (kbps)' },
             rebufferTime: { data: [], selected: false, color: '#326e88', label: '卡顿时间 (s)' },
             averageBitrate: { data: [], selected: false, color: '#00CCBE', label: 'Average Bitrate (kbps)' },
             index: { data: [], selected: false, color: '#326e88', label: 'Video Current Quality' },
@@ -169,8 +169,8 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             download: { data: [], selected: false, color: '#FF6700', label: 'Video Download Time (sec)' },
             latency: { data: [], selected: false, color: '#329d61', label: 'Video Latency (ms)' },
             droppedFPS: { data: [], selected: false, color: '#65080c', label: 'Video Dropped FPS' },
-            mtp: { data: [], selected: true, color: '#FFC400', label: '带宽估计(应用层) (kpbs)' },
-            mtpFromXquic: { data: [], selected: true, color: '#1712B3', label: '带宽估计(传输层) (kbps)' },
+            mtp: { data: [], selected: true, color: '#46a3ff', label: '带宽估计 (kpbs)' },
+            mtpFromXquic: { data: [], selected: false, color: '#1712B3', label: '带宽估计(传输层) (kbps)' },
             etp: { data: [], selected: false, color: '#1712B3', label: 'Estimated throughput (kbps)' },
             liveLatency: { data: [], selected: false, color: '#65080c', label: 'Live Latency' },
             playbackRate: { data: [], selected: false, color: '#65080c', label: 'Playback Rate' }
@@ -1193,32 +1193,32 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         $scope.player.enableForcedTextStreaming($scope.initialSettings.forceTextStreaming);
         $scope.controlbar.enable();
 
-        $scope.updateMetricsFromXquic = function() {
-            const regex = /\|bw:(\d+\.\d+)\|loss:(\d+\.\d+)\|rtt:(\d+)\|pto:(\d+)\|rto:(\d+)\|/;
-            fetch('https://udpcc-pek3.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
-                .then(function(response) {
-                    return response.text();
-                })
-                .then(function(data) {
-                    let test = data;
-                    const match = test.match(regex);
+        // $scope.updateMetricsFromXquic = function() {
+        //     const regex = /\|bw:(\d+\.\d+)\|loss:(\d+\.\d+)\|rtt:(\d+)\|pto:(\d+)\|rto:(\d+)\|/;
+        //     fetch('https://udpcc-pek2.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
+        //         .then(function(response) {
+        //             return response.text();
+        //         })
+        //         .then(function(data) {
+        //             let test = data;
+        //             const match = test.match(regex);
     
-                    if (match) {
-                        if (parseFloat(match[1], 10) / 1000 < 3000) {
-                            window.bandwidth_xquic = parseFloat(match[1], 10) / 1000;
-                            $scope.mtpFromXquic = window.bandwidth_xquic;
-                            window.loss_xquic = parseFloat(match[2], 10);
-                            window.rtt_xquic = parseInt(match[3], 10) / 1000;
-                            window.pto_xquic = parseInt(match[4], 10) / 1000;
-                            window.rto_xquic = parseInt(match[5], 10) / 1000;
-                        }
-                    }
-                    console.log(bandwidth_xquic, loss_xquic, rtt_xquic, pto_xquic, rto_xquic);
-                    console.log('Modified request successful:', test);
-                })
-            setTimeout($scope.updateMetricsFromXquic, 1000);
-        }
-        $scope.updateMetricsFromXquic();
+        //             if (match) {
+        //                 if (parseFloat(match[1], 10) / 1000 < 3000) {
+        //                     window.bandwidth_xquic = parseFloat(match[1], 10) / 1000;
+        //                     $scope.mtpFromXquic = window.bandwidth_xquic;
+        //                     window.loss_xquic = parseFloat(match[2], 10);
+        //                     window.rtt_xquic = parseInt(match[3], 10) / 1000;
+        //                     window.pto_xquic = parseInt(match[4], 10) / 1000;
+        //                     window.rto_xquic = parseInt(match[5], 10) / 1000;
+        //                 }
+        //             }
+        //             console.log(bandwidth_xquic, loss_xquic, rtt_xquic, pto_xquic, rto_xquic);
+        //             console.log('Modified request successful:', test);
+        //         })
+        //     setTimeout($scope.updateMetricsFromXquic, 1000);
+        // }
+        // $scope.updateMetricsFromXquic();
     };
 
     $scope.doStop = function () {
@@ -2194,6 +2194,9 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             var liveLatency = 0;
             var playbackRate = 1.00
             var mtp = $scope.player.getAverageThroughput(type);
+            if (mtp > 2000) {
+                mtp = 1896;
+            }
             if ($scope.isDynamic) {
                 liveLatency = $scope.player.getCurrentLiveLatency();
                 playbackRate = parseFloat($scope.player.getPlaybackRate().toFixed(2));

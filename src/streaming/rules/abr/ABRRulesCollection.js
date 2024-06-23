@@ -174,7 +174,7 @@ function ABRRulesCollection(config) {
             if (req.quality !== SwitchRequest.NO_CHANGE) {
                 // We only use the new quality in case it is lower than the already saved one or if no new quality has been selected for the respective priority
                 if (values[req.priority].quality === SwitchRequest.NO_CHANGE || values[req.priority].quality > req.quality) {
-                    req.quality = Math.max(5, req.quality);
+                    req.quality = Math.min(5, req.quality);
                     // req.quality = req.quality < 4 ? 4 : req.quality;
                     values[req.priority].quality = req.quality;
                     values[req.priority].reason = req.reason || null;

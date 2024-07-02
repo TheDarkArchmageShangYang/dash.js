@@ -696,3 +696,16 @@ BS Information
 .bs-callout-danger {
     border-left-color: #CA0B00;
 }
+
+.bitrate-label {
+    font-size: 24px;
+    vertical-align: middle; /* 调整标签的垂直对齐 */
+}
+
+.checkbox-large {
+    width: 24px;   /* 调整复选框的宽度 */
+    height: 24px;  /* 调整复选框的高度 */
+    /* transform: scale(1.5); 放大复选框 */
+    vertical-align: top; /* 调整复选框的垂直对齐 */
+    margin-right: 10px; /* 调整复选框和标签之间的间距 */
+}

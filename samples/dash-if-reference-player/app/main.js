@@ -2,11 +2,14 @@
 
 var app = angular.module('DashPlayer', ['DashSourcesService', 'DashContributorsService', 'DashIFTestVectorsService', 'angular-flot']); /* jshint ignore:line */
 
+window.mode = 'BOLA';
 window.bandwidth_xquic = 1985;
 window.loss_xquic = 0;
 window.rtt_xquic = 0;
 window.pto_xquic = 0;
 window.rto_xquic = 0;
+
+window.downloadTimePredict = [];
 
 $(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip();
@@ -310,7 +313,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.audioPlaybackRate = 1.00;
 
     // Starting Options
-    $scope.autoPlaySelected = false;
+    $scope.autoPlaySelected = true;
     $scope.autoLoadSelected = false;
     $scope.muted = false;
     $scope.cmcdEnabled = false;
@@ -530,7 +533,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         // console.log("BUFFER_EMPTY", bufferLevel);
         if ($scope.lastBufferEmpty == false) {
             $scope.lastBufferEmpty = true;
-            var now = new Date().getTime() / 1000;
+            var now = new Date().getTime();
             $scope.lastBufferEmptyTime = now;
         }
     }, $scope);
@@ -540,7 +543,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         var bufferLevel = dashMetrics.getCurrentBufferLevel(e.type, true);
         // console.log("BUFFER_LOADED", bufferLevel);
         if ($scope.lastBufferEmpty == true) {
-            var now = new Date().getTime() / 1000;
+            var now = new Date().getTime();
             $scope.rebufferTime += now - $scope.lastBufferEmptyTime;
             $scope.lastBufferEmpty = false;
             // console.log("rebufferTime: %f", $scope.rebufferTime);
@@ -562,12 +565,12 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             // console.log('qualitySum',$scope.qualitySum,'index',e.request.index,'averageBitrate',$scope.averageBitrate);
             $scope.smoothness += Math.abs(quality - $scope.lastQuality);
             $scope.lastQuality = quality;
-            // console.log('new chunk quality:', quality+'('+e.request.quality+')', 'qualitySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness);
+            console.log('new chunk quality:', quality+'('+e.request.quality+')', 'qualitySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness, 'rebufferTime', $scope.rebufferTime);
             // console.log('bufferLevel',bufferLevel);
             // let requests = dashMetrics.getHttpRequests(e.request.mediaType);
             // let currentRequest = requests[requests.length - 1];
             // console.log('time1:', currentRequest.tresponse.getTime() - currentRequest.trequest.getTime(), 'time2:', currentRequest._tfinish.getTime() - currentRequest.tresponse.getTime());
-            // console.log('QoE:', $scope.qualitySum - $scope.smoothness - 3000 * $scope.rebufferTime);
+            console.log('QoE:', $scope.qualitySum - $scope.smoothness - 3 * $scope.rebufferTime);
         }
     }, $scope);
 
@@ -651,11 +654,21 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         if ($scope.customABRRulesSelected) {
             // $scope.player.addABRCustomRule('qualitySwitchRules', 'DownloadRatioRule', DownloadRatioRule); /* jshint ignore:line */
             // $scope.player.addABRCustomRule('qualitySwitchRules', 'ThroughputRule', CustomThroughputRule); /* jshint ignore:line */
-            $scope.player.addABRCustomRule('qualitySwitchRules', 'ProphetRule', ProphetRule); /* jshint ignore:line */
+            if (window.mode === 'Prophet') {
+                $scope.player.addABRCustomRule('qualitySwitchRules', 'ProphetRule', ProphetRule); /* jshint ignore:line */
+            }
+            else if (window.mode === 'MPC') {
+                $scope.player.addABRCustomRule('qualitySwitchRules', 'MPCRule', MPCRule); /* jshint ignore:line */
+            }
         } else {
             // $scope.player.removeABRCustomRule('DownloadRatioRule');
             // $scope.player.removeABRCustomRule('ThroughputRule');
-            $scope.player.removeABRCustomRule('ProphetRule');
+            if (window.mode === 'Prophet') {
+                $scope.player.removeABRCustomRule('ProphetRule');
+            }
+            else if (window.mode === 'MPC') {
+                $scope.player.removeABRCustomRule('MPCRule');
+            }
         }
     };
 
@@ -1207,13 +1220,13 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                     const match = test.match(regex);
     
                     if (match) {
-                        // window.bandwidth_xquic = parseFloat(match[1]) / 1000;
-                        if (parseFloat(match[1]) / 1000 > 1000 && parseFloat(match[1]) / 1000 < 2500) {
-                            window.bandwidth_xquic = parseFloat(match[1]) / 1000;
-                        }
-                        else {
-                            window.bandwidth_xquic = window.bandwidth_xquic + Math.random() * 50 - 25;
-                        }
+                        window.bandwidth_xquic = parseFloat(match[1]) / 1000;
+                        // if (parseFloat(match[1]) / 1000 > 1000 && parseFloat(match[1]) / 1000 < 2500) {
+                        //     window.bandwidth_xquic = parseFloat(match[1]) / 1000;
+                        // }
+                        // else {
+                        //     window.bandwidth_xquic = window.bandwidth_xquic + Math.random() * 50 - 25;
+                        // }
                         $scope.mtpFromXquic = window.bandwidth_xquic;
                         window.loss_xquic = parseFloat(match[2]);
                         window.rtt_xquic = parseInt(match[3], 10) / 1000;
@@ -2045,9 +2058,9 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         var requestWindow = requests.filter(function (req) {
             return req.responsecode >= 200 && req.responsecode < 300 && req.type === 'MediaSegment' && req._stream === type && !!req._mediaduration;
         });
-        if (type == 'video') {
-            console.log('requestWindow', requestWindow);
-        }
+        // if (type == 'video') {
+        //     console.log('requestWindow', requestWindow);
+        // }
 
         if (requestWindow.length > 0) {
             var latencyTimes = requestWindow.map(function (req) {
@@ -2085,7 +2098,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             };
 
             var downloadTimesBothDownloadAndLatency = requestWindow.map(function (req) {
-                return Math.abs(req._tfinish.getTime() - req.trequest.getTime()) / 1000;
+                return Math.abs(req._tfinish.getTime() - req.trequest.getTime());
             });
 
             downloadTimeTotal[type] = {
@@ -2177,7 +2190,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                 $scope.chartOptions.yaxes.push({
                     axisLabel: data.label,
                     min: 0,
-                    max: 2500
+                    max: 3500
                 });
             }
             else {
@@ -2266,13 +2279,78 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                     $scope.plotPoint('etp', type, (httpMetrics.etp[type] / 1000).toFixed(3), time);
                     $scope.plotPoint('mtp', type, (mtp).toFixed(3), time);
                     $scope.plotPoint('mtpFromXquic', type, $scope.mtpFromXquic, time);
+                    // if (type == 'video' && httpMetrics.downloadTimeTotal[type].count == 97) {
+                        // if (type == 'video' && httpMetrics.downloadTimeTotal[type].count == 97) {
+                        //     for (let i of window.downloadTimePredict) {
+                        //         console.log(i);
+                        //     }
+                        // }
+                    if (type == 'video') {
+                        // console.log(httpMetrics.downloadTimeTotal[type].sum, httpMetrics.downloadTimeTotal[type].average, httpMetrics.downloadTimeTotal[type].count);
+                        var requests = dashMetrics.getHttpRequests(type);
+                        var requestWindow = requests.filter(function (req) {
+                            return req.responsecode >= 200 && req.responsecode < 300 && req.type === 'MediaSegment' && req._stream === type && !!req._mediaduration;
+                        });
+                
+                        if (requestWindow.length > 0) {
+                            var downloadTimeMeasured = requestWindow.map(function (req) {
+                                var match = req.url.match(/v\d+_\d+-\d+-i-(\d+)\.m4s/);
+                                var value = match ? parseInt(match[1], 10) : null;
+                                return [Math.abs(req._tfinish.getTime() - req.trequest.getTime()), req._quality, value];
+                            });
+
+                            console.log('downloadTimePredict', window.downloadTimePredict);
+                            console.log('downloadTimeMeasured', downloadTimeMeasured);
+                            const downloadTimeError = [];
+                            var i = 0, j = 0;
+                            while (i < window.downloadTimePredict.length && j < downloadTimeMeasured.length) {
+                                var [downloadTime1, bitrateRecord1, chunkNumber1] = window.downloadTimePredict[i];
+                                var [downloadTime2, bitrateRecord2, chunkNumber2] = downloadTimeMeasured[j];
+
+                                if (chunkNumber1 === chunkNumber2) {
+                                    var pos = 1;
+                                    if (downloadTime1 < downloadTime2) {
+                                        pos = -1;
+                                    }
+                                    downloadTimeError.splice(downloadTimeError.length, 0, [Math.abs(downloadTime1 - downloadTime2) / downloadTime2 * 100, pos, chunkNumber1]);
+                                    i++;
+                                    j++;
+                                } else if (chunkNumber1 < chunkNumber2) {
+                                    i++;
+                                } else {
+                                    j++;
+                                }
+                            }
+                            // const reversedDownloadTimePredict = window.downloadTimePredict.reverse();
+                            // console.log('reverseDownloadTimePredict', reversedDownloadTimePredict);
+                            // const reversedDownloadTimeMeasure = downloadTimeMeasured.reverse();
+
+                            // for (let i = 0; i < reversedDownloadTimePredict.length; i++) {
+                            //     if (reversedDownloadTimePredict[i] !== undefined && reversedDownloadTimeMeasure[i] !== undefined) {
+                            //         downloadTimeError.push(Math.abs(reversedDownloadTimePredict[i] - reversedDownloadTimeMeasure[i]) / reversedDownloadTimeMeasure[i]);
+                            //     }
+                            // }
+
+                            // console.log('downloadTimePredict', window.downloadTimePredict);
+                            // console.log('reversedDownloadTimePredict', reversedDownloadTimePredict);
+                            // const averageDownloadTimePredict = reversedDownloadTimePredict.reduce((acc, error) => acc + error, 0) / reversedDownloadTimePredict.length;
+                            // console.log("Average DownloadTimePredict:", averageDownloadTimePredict);
+
+                            // console.log('downloadTimeMeasure', downloadTimeMeasured);
+                            // console.log('reversedDownloadTimeMeasure', reversedDownloadTimeMeasure);
+                            // const averageDownloadTimeMeasure = reversedDownloadTimeMeasure.reduce((acc, error) => acc + error, 0) / reversedDownloadTimeMeasure.length;
+                            // console.log("Average DownloadTimeMeasure:", averageDownloadTimeMeasure);
+
+                            console.log("Errors:", downloadTimeError);
+                            let averageError1 = downloadTimeError.reduce((aver, error) => aver + error[0], 0) / downloadTimeError.length;
+                            let averageError1Ave = downloadTimeError.reduce((aver, error) => aver + error[0] * error[1], 0) / downloadTimeError.length;
+                            // console.log("Average Error:", averageError, Math.abs(averageDownloadTimePredict - averageDownloadTimeMeasure) / averageDownloadTimeMeasure);
+                            console.log("Average Error1:", averageError1);
+                            console.log("Average Error1Ave:", averageError1Ave);
+                        }
+                    }
                 }
                 $scope.safeApply();
-            }
-            if (type == 'video') {
-                $scope.downloadTimeAverage = httpMetrics.download[type].average + httpMetrics.latency[type].average;
-                console.log('downloadTimeAverage', $scope.downloadTimeAverage);
-                console.log(httpMetrics.downloadTimeTotal[type].sum, httpMetrics.downloadTimeTotal[type].average, httpMetrics.downloadTimeTotal[type].count);
             }
         }
     }
@@ -2320,6 +2398,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         $scope.additionalAbrRules.abandonRequestsRule = currentConfig.streaming.abr.additionalAbrRules.abandonRequestsRule;
         $scope.ABRStrategy = currentConfig.streaming.abr.ABRStrategy;
         $scope.abrThroughputCalculationMode = currentConfig.streaming.abr.fetchThroughputCalculationMode;
+        $scope.toggleBufferRule();
     }
 
     function setAdditionalPlaybackOptions() {
@@ -2485,13 +2564,38 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                         }
                     }
                 });
-                $scope.player.updateSettings({
-                    'streaming': {
-                        'abr': {
-                            'useDefaultABRRules': false
+                if (window.mode === 'BOLA') {
+                    $scope.player.updateSettings({
+                        'streaming': {
+                            'abr': {
+                                'additionalAbrRules': {
+                                    'insufficientBufferRule': false,
+                                    'switchHistoryRule': false,
+                                    'droppedFramesRule': false,
+                                    'abandonRequestsRule': false,
+                                }
+                            }
                         }
-                    }
-                });
+                    });
+                }
+                if (window.mode === 'BOLA' || window.mode === 'dash.js') {
+                    $scope.player.updateSettings({
+                        'streaming': {
+                            'abr': {
+                                'useDefaultABRRules': true
+                            }
+                        }
+                    });
+                }
+                else if (window.mode === 'Prophet' || window.mode === 'MPC') {
+                    $scope.player.updateSettings({
+                        'streaming': {
+                            'abr': {
+                                'useDefaultABRRules': false
+                            }
+                        }
+                    });
+                }
                 $scope.player.updateSettings({
                     streaming: {
                         cmsd: {

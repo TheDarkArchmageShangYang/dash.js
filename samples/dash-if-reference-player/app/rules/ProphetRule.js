@@ -32,21 +32,22 @@
 /*global dashjs*/
 
 let ProphetRule;
-const TEST_STATE_ONE_BITRATE = 0;
-const TEST_STATE_STARTUP = 1;
-const TEST_STATE_STEADY = 2;
-
-const horizon = 2;
-// const bufferMaxSize = 25;
-const videoChunkLength = 2000;
-const rebufferPenalty = 3;
-const MTU = 1166;
-const setBitrates = [1,3,4,5,6];
-// const setBitrates = [3,4,5,6];
-// const setBitrates = [3,4,5];
 
 function ProphetRuleClass() {
-    // console.log('this is a test',window.requestIndex);
+    console.log('Prophet is working');
+    const videoChunkSize = [
+        [59721,74169,55032,56752,47530,48364,52820,49355,64369,36633,43649,48694,42830,45718,63990,62758,50828,51562,46648,48850,44969,49044,60496,50175,53080,52660,56317,52637,49375,42919,50742,53291,45243,50672,52599,49961,55560,51362,40881,50600,55679,55011,53260,48729,51771,52515,44112,50897,53045,46375,53733,50278,61823,44786,36547,39424,52936,59631,51464,52019,57212,48904,49561,51894,46883,51827,52188,55886,55434,53024,41482,52031,47934,47183,44698,51038,47461,51041,57897,43518,43460,43535,45080,56131,49937,49600,77138,51357,54264,51314,51060,58447,44994,38175,46089,49101,28312],
+        [87486,94315,72359,83221,69454,70403,80447,74985,93429,70013,57408,68881,68664,84631,85468,88381,77573,73137,66739,72366,65243,76597,85767,70381,77722,83024,92471,87330,81250,58801,65418,72895,72592,70917,73337,77279,87034,78350,62807,78074,78628,79043,82951,74861,85635,78292,66474,71180,73720,73034,74564,79374,95994,85907,57365,53790,75974,77631,72618,76411,84619,72802,76840,80648,68498,75383,77996,85448,90638,88690,85088,74826,63965,67645,51279,72732,70543,73711,83697,66294,74364,73604,78605,83252,71766,73444,100122,72190,85506,81519,77235,82829,73288,64219,52565,65856,56135],
+        [141282,155827,125040,132607,112034,114896,128783,123227,153185,98829,91248,113559,99498,123232,144645,147821,130594,120658,108676,116393,99197,120017,147651,116841,123631,126590,142765,139888,108656,94771,113881,127315,115095,117183,116064,120714,133999,123482,100333,138757,127851,122093,136872,115124,135495,119260,98662,116296,127350,109471,120123,127296,149628,123861,86384,83717,124461,134057,132811,124026,129450,116099,124053,130463,106432,121818,128740,136393,146766,119155,116658,111724,106768,100540,99244,131075,110452,120822,141803,115278,103398,107080,118718,128730,121092,117544,170763,120712,135391,121879,121149,138163,115203,103073,84570,107278,72118],
+        [218953,231330,189055,209810,173551,177261,192106,190249,244719,166842,144451,174113,155385,197257,214125,223037,188432,186326,173759,189036,164860,188360,216458,188676,193547,192804,218223,216186,190601,146458,175934,190280,178660,182171,178984,193979,211644,193952,149419,201294,198269,188203,215218,184676,205911,195942,165344,178456,183414,176489,183089,196611,226486,199295,146202,131514,198153,202243,202296,198212,201625,156593,193435,206887,173993,195841,202095,210742,229255,171833,210226,154935,165847,155217,151742,209823,182646,195681,220617,170063,155313,190203,183299,201206,186793,185300,254643,183638,205106,193881,180990,212814,177217,153836,136731,177376,127977],
+        [327613,340673,276919,334168,288757,282294,302840,314841,377182,275692,235035,285280,284149,277642,363649,345885,297290,287556,265573,295248,296546,310864,311963,282115,302189,322093,356218,331153,298737,228213,276952,310924,277828,339414,272818,308675,338685,300519,249937,336902,296437,305301,324368,291838,337157,319314,262029,274638,312753,274483,290243,300092,374242,322134,228278,258882,321476,301420,332540,308907,300873,269519,307698,312585,282432,301917,319380,350749,368023,322230,309314,289413,239148,248664,259764,315827,274832,331052,325385,262121,301419,265485,330862,310590,303327,296150,359626,275235,329656,300547,295821,342840,294842,243770,250973,299933,195725],
+        [495048,539060,437741,519944,415491,462280,484055,449221,574817,421932,372339,428719,439072,466443,534691,525796,441111,411722,456147,457741,462377,477442,467687,449741,457375,489476,521611,514843,463299,358332,457104,466066,433614,533085,405177,480537,514593,473115,371722,552033,451259,440345,494837,460394,511811,456215,428734,445441,470212,427764,444101,461834,565945,510654,341943,416254,495342,477456,490721,485090,459017,414412,459491,494962,428526,456536,477188,558141,530351,495705,475834,468108,353512,375450,431352,507235,415898,492767,506488,424089,452910,405540,512319,512686,431588,454667,547853,426119,496972,462022,447379,534685,450418,380312,384989,461381,299425],
+        [838177,890702,651428,780381,655721,645147,795676,724605,865600,606958,541774,682486,694157,694246,802642,836127,667592,680419,724714,705051,633275,721273,837102,682849,695459,727460,825782,752561,673680,557765,678997,792068,655603,836023,674271,684530,776218,760938,566838,769212,734163,680953,796704,671422,791202,714558,595055,728935,733271,650464,718126,762338,850550,697022,499827,642144,742392,756078,818999,742264,660056,681145,709784,787899,656266,701815,773105,814188,796431,696241,728458,711438,549722,589569,662264,836745,642226,785252,792766,609521,649530,689970,743514,783785,671295,671707,923362,663888,738933,725988,658877,824650,663951,567505,642371,722166,444706],
+        [1145867,1208905,931675,1191390,1057080,1119993,1026761,1134116,1245559,987497,866042,1075583,1028110,1129425,1200782,1089390,988925,1066544,1106191,1063010,1110709,1062813,1023521,1078931,1013406,1196057,1208483,1066893,1053130,952269,1089380,1063103,1015405,1274284,960433,1099079,1120348,1100378,962301,1194428,1021594,1018179,1128044,1048425,1172522,1048984,937673,1106402,1230806,955984,1014536,1090695,1259901,1135687,796181,1175867,1018254,1116360,1118076,1046064,1047156,1066037,1087601,1060251,1093037,1098037,1065720,1221041,1172284,1135503,1111459,1032489,929057,990724,968221,1179246,984872,1148998,1126258,1019862,1045316,1063175,1086668,1097903,1075409,1046519,1172168,1046934,1041771,1083179,1039387,1207119,981184,979956,1074550,1080462,716829],
+        [1535564,1620285,1269756,1371500,1299593,1110665,1537560,1419367,1443640,1150344,1048950,1338900,1251304,1303358,1481963,1482209,1279246,1261881,1294098,1259269,1288054,1353055,1551507,1325069,1198053,1295347,1521939,1350854,1336747,968044,1440635,1415247,1160228,1727664,1187073,1287849,1415619,1413330,1002890,1507766,1242136,1302168,1388401,1251722,1416202,1321234,1178151,1381047,1483665,1144404,1306854,1319882,1589851,1219615,1039973,1294102,1508564,1266796,1594067,1316179,1300219,1186007,1375130,1346691,1162886,1318148,1369247,1680134,1305914,1283088,1324467,1227251,1218548,1177530,1317341,1551747,1138380,1451108,1452943,1143820,1205956,1256526,1423203,1332599,1379156,1294023,1575368,1270880,1324969,1319305,1266576,1493740,1211363,1099485,1352346,1294667,826712],
+        [33578,32948,32770,32701,32965,32952,33122,32714,32991,32960,33137,32561,33008,33009,33041,32662,32900,33174,33118,32676,32940,33123,32941,32664,32970,33099,32900,32777,32956,33052,33477,32342,32997,33065,32995,32675,32972,33120,32981,32700,32917,33079,33285,32376,33120,32918,33018,32461,33217,32993,33234,32440,33062,32987,33005,32782,32984,33061,32925,32600,33137,32983,33036,32675,33037,32984,32997,32674,33071,33053,32965,32940,32907,32938,33010,32594,33002,33109,32962,32641,33012,33117,33109,32554,33127,32934,33028,32709,33008,33032,32934,32633,33000,33120,32951,32713,25812]
+    ]
+
     const context = this.context;
 
     const factory = dashjs.FactoryMaker;
@@ -60,16 +61,24 @@ function ProphetRuleClass() {
         logger,
         TestStateDict;
 
-    // let bandwidth_xquic = 3000,
-    //     loss_xquic = 0,
-    //     rtt_xquic = 52.5,
-    //     pto_xquic = 52.5+200,
-    //     rto_xquic = 1000;
+    const TEST_STATE_ONE_BITRATE = 0;
+    const TEST_STATE_STARTUP = 1;
+    const TEST_STATE_STEADY = 2;
+
+    const horizon = 5;
+    const coefficient = 1;
+
+    const videoChunkLength = 2000;
+    const rebufferPenalty = 3;
+    const MTU = 1183;
+    const MaxPacketSize = 1258;
+    const setBitrates = [1,3,4,5,6];
+
+    let chunkNumber = 1;
 
     function setup() {
         logger = Debug(context).getInstance().getLogger(instance);
         resetInitialSettings();
-        // updateMetrics();
     }
 
     function getInitialTestState(rulesContext) {
@@ -108,29 +117,6 @@ function ProphetRuleClass() {
         return TestState;
     }
 
-    // function updateMetrics() {
-    //     const regex = /\|bw:(\d+\.\d+)\|loss:(\d+\.\d+)\|rtt:(\d+)\|pto:(\d+)\|rto:(\d+)\|/;
-    //     fetch('https://udpcc-pek1.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
-    //         .then(function(response) {
-    //             return response.text();
-    //         })
-    //         .then(function(data) {
-    //             let test = data;
-    //             const match = test.match(regex);
-
-    //             if (match) {
-    //                 bandwidth_xquic = parseFloat(match[1], 10) / 1000;
-    //                 loss_xquic = parseFloat(match[2], 10);
-    //                 rtt_xquic = parseInt(match[3], 10) / 1000;
-    //                 pto_xquic = parseInt(match[4], 10) / 1000;
-    //                 rto_xquic = parseInt(match[5], 10) / 1000;
-    //             }
-    //             console.log(bandwidth_xquic, loss_xquic, rtt_xquic, pto_xquic, rto_xquic);
-    //             console.log('Modified request successful:', test);
-    //         })
-    //     setTimeout(updateMetrics, 1000);
-    // }
-
     function getChunkBitrateSequenceOptions(TestState, horizon, currentArray = []) {
         if (currentArray.length === horizon) {
             TestState.chunkBitrateSequenceOptions.push([...currentArray]);
@@ -143,219 +129,70 @@ function ProphetRuleClass() {
         }
     }
 
-    function calculateTimeForTimeout(timeForPacket, loss, PTO, RTO) {
+    function calculateTailRetransmitTime(bandwidth, loss, RTT, PTO, RTO, chunkSize) {
         let time = 0;
-        time += (PTO+timeForPacket)+loss*(2*PTO+timeForPacket);
-        for (let i = 0; i < 7; i++) {
-                time += Math.pow(loss, i+2)*(Math.pow(2,i)*RTO+timeForPacket);
-        }
-        return time;
-    }
+        let timeForPacket = MTU * 8 / bandwidth;
+        // let timeForPacket = MTU / bandwidth;
 
-    function calculate(bandwidth, loss, RTT) {
-        let blockTime = 0;
-        let timeForPacket = MTU / bandwidth;
+        let N = Math.ceil(bandwidth * RTT / 8 / MTU);
+        let lastPacketSize = bandwidth * RTT / 8 - (N - 1) * MTU;
 
-        let N1 = Math.ceil(65536.0 / MTU);
-        let N2 = Math.floor(131072.0 / MTU);
-        let timeForTwoPartPacket = (N2*(1-loss) + N1*loss*(1-loss)) * timeForPacket;
+        time += Math.pow(1-loss, N) * ((N-1)*timeForPacket + lastPacketSize * 8 / bandwidth);
 
-        let probabilityWithBlock = 0;
-        let totalTime = 0;
+        for (let i = 1; i <= N; i++) {
+            let probabilityForFistLost = Math.pow(1-loss*loss, i-1) * loss*(1-loss) * Math.pow(1-loss, N-i);
+            let timeForFistLost = (i-1)*(1-loss)*timeForPacket;
+            let timeForTimeThreshold = RTT * 9 / 8;
+            if (i == N) {
+                timeForFistLost += PTO + lastPacketSize * 8 / bandwidth;
+            }
+            else if (timeForTimeThreshold < RTT + 2 * timeForPacket || i == N - 1) {
+                timeForFistLost += RTT + 2 * timeForPacket;
+            }
+            else if (timeForTimeThreshold < RTT + 3 * timeForPacket || i == N - 2) {
+                timeForFistLost += RTT + 3 * timeForPacket;
+            }
+            else {
+                timeForFistLost += RTT + 4 * timeForPacket;
+            }
+            time += probabilityForFistLost * timeForFistLost;
+    
+            // let probabilityForSecondLost = Math.pow(1-loss*loss*loss, i-1) * loss*loss*(1-loss) * Math.pow(1-loss*loss, N-i);
+            // let timeForSecondLost = timeForFistLost;
+            // if (i == N) {
+            //     timeForSecondLost += 2 * PTO + lastPacketSize / bandwidth;
+            // }
+            // else {
+            //     timeForSecondLost + PTO + timeForPacket;
+            // }
 
-        for (let i = 1; i <= N1; i++) {
-                let transmitTime = (i-1)*(1-loss)*timeForPacket;
-                let retransmitTime = transmitTime + RTT + 4*timeForPacket;
+            let probabilityForSecondLostTriggerPTO = Math.pow(1-loss*loss, i-1) * loss*loss*(1-loss) * Math.pow(1-loss, N-i);
+            let timeForSecondLostTriggerPTO = timeForFistLost + PTO + timeForPacket;
 
-                let timeForFirstLost = retransmitTime + RTT - timeForTwoPartPacket;
-                let probabilityForFirstLost = (Math.pow(1-loss*loss, i-1) * (loss*(1-loss)) * Math.pow(1-loss, N1-i));
-                
-                let timeForSecondLost = timeForFirstLost + RTT + 3 * timeForPacket;
-                let probabilityForSecondLost = (Math.pow(1-loss*loss*loss, i-1) * (loss*loss*(1-loss)) * Math.pow(1-loss*loss, N1-i));
+            let probabilityForSecondLostTriggerFastRetransmit = Math.pow(1-loss*loss*loss, i-1) * loss*loss*(1-loss) * Math.pow(1-loss*loss, N-i) - Math.pow(1-loss*loss, i-1) * loss*loss*(1-loss) * Math.pow(1-loss, N-i);
+            let timeForSecondLostTriggerFastRetransmit = timeForFistLost + PTO + RTT + timeForPacket;
 
-                if (timeForFirstLost > 0) {
-                        blockTime += probabilityForFirstLost * timeForFirstLost;
-                        probabilityWithBlock += probabilityForFirstLost;
-                }
-                if (timeForSecondLost > 0) {
-                        blockTime += probabilityForSecondLost * timeForSecondLost;
-                        probabilityWithBlock += probabilityForSecondLost;
-                }
-                totalTime += probabilityForFirstLost * (timeForFirstLost-0.5*RTT+timeForTwoPartPacket) + probabilityForSecondLost * (timeForSecondLost-0.5*RTT+timeForTwoPartPacket);
-        }
+            if (i == N) {
+                timeForSecondLostTriggerPTO = timeForFistLost + 2 * PTO + timeForPacket;
+                timeForSecondLostTriggerFastRetransmit = timeForFistLost + 2 * PTO + RTT + timeForPacket;
+            }
 
-        return [blockTime, probabilityWithBlock, totalTime];
-    }
-
-    function calculateBlockTimeWithoutBlock(start, bandwidth, loss, RTT, PTO, RTO, bitrate, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock) {
-        let blockTime = blockTimeWithoutBlock;
-        // return blockTime;
-        let N1 = Math.ceil(65536.0 / MTU);
-
-        if (start < 0) {
-                start = 0;
-        }
-        else {
-                start += N1 * 1166;
-        }
-
-        if (start + 131072 >= bitrate * videoChunkLength / 8) {
-                blockTime += calculateRetransmitTime(start, bandwidth, loss, RTT, PTO, RTO, bitrate);
-                return blockTime;
-        }
-        if (1 - blockProbabilityWithoutBlock > 0) {
-            blockTime += (1 - blockProbabilityWithoutBlock) * calculateBlockTimeWithoutBlock(start, bandwidth, loss, RTT, PTO, RTO, bitrate, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock);
-        }
-        if (blockProbabilityWithoutBlock > 0) {
-            blockTime += blockProbabilityWithoutBlock * calculateBlockTimeWithBlock(start, bandwidth, loss, RTT, PTO, RTO, blockTimeWithoutBlock, totalTimeWithoutBlock, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock, bitrate);
-        }
-        return blockTime;
-    }
-
-    function calculateBlockTimeWithBlock(start, bandwidth, loss, RTT, PTO, RTO, blockTimeLast, totalTimeLast, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock, bitrate) {
-        let blockTime = 0;
-        let timeForPacket = MTU / bandwidth;
-        let timeForTimeout = calculateTimeForTimeout(timeForPacket, loss, PTO, RTO);
-
-        let N1 = 65536 / MTU + 1;
-        let N2 = 131072 / MTU;
-        let timeForTwoPartPacket = N2 * (1-loss) * timeForPacket;
-        let probabilityWithBlock = 0;
-        let totalTime = 0;
-
-        let lastStart = start;
-        start += N1 * MTU;
-
-        let probability = 1;
-
-        for (let i = N1 + 1; i <= N2; i++) {
-                let transmitTime = (i-1)*(1-loss)*timeForPacket;
-                let retransmitTime = transmitTime + RTT + 4*timeForPacket;
-                let timeForFirstLost = retransmitTime + 0.5*RTT;
-                let probabilityForFirstLost = loss;
-                let timeForSecondLost = timeForFirstLost + RTT + 3 * timeForPacket;
-                let probabilityForSecondLost = loss*loss;
-                if (timeForFirstLost > totalTimeLast) {
-                        probability *= 1 - probabilityForFirstLost;
-                        start += probability * MTU;
-                }
-                else if ((timeForFirstLost <= totalTimeLast) && (timeForSecondLost > totalTimeLast)) {
-                        probability *= 1 - probabilityForSecondLost;
-                        start += probability * MTU;
-                }
-                else if (timeForSecondLost <= totalTimeLast){
-                        start += MTU;
-                }
-        }
-
-        
-        let pknBeforeBlock = (lastStart + 131072 - start) / MTU + 1;
-
-        for (let i = 1; i <= pknBeforeBlock; i++) {
-                let transmitTime = (i-1)*(1-loss)*timeForPacket-blockTimeLast;
-                let retransmitTime = transmitTime + RTT + Math.min(4,N1-i+1)*timeForPacket;
-                let timeForFirstLost = retransmitTime + RTT - timeForTwoPartPacket;
-                let probabilityForFirstLost = (Math.pow(1-loss*loss, i-1) * (loss*(1-loss)) * Math.pow(1-loss, N1-i));
-
-                let timeForSecondLost = timeForFirstLost + 2 * RTT;
-                let probabilityForSecondLost = loss*loss*(1-loss)*(Math.pow(1-loss*loss*loss, i-1)*Math.pow(1-loss*loss, N1-i)-Math.pow(1-loss*loss, i-1)*Math.pow(1-loss, N1-i));
-                let probabilityForTimeout = loss*loss*(1-loss)*Math.pow(1-loss*loss, i-1)*Math.pow(1-loss, N1-i);
-
-                if (timeForFirstLost > 0) {
-                        blockTime += probabilityForFirstLost * timeForFirstLost;
-                        probabilityWithBlock += probabilityForFirstLost;
-                }
-                if (timeForSecondLost > 0) {
-                        blockTime += probabilityForSecondLost * timeForSecondLost;
-                        probabilityWithBlock += probabilityForSecondLost;
-                }
-                if (timeForFirstLost + timeForTimeout > 0) {
-                        blockTime += probabilityForTimeout * (timeForFirstLost+timeForTimeout);
-                        probabilityWithBlock += probabilityForTimeout;
-                }
-                totalTime += probabilityForFirstLost * (timeForFirstLost-0.5*RTT+timeForTwoPartPacket);
-                totalTime += probabilityForSecondLost * (timeForSecondLost-0.5*RTT+timeForTwoPartPacket);
-                totalTime += probabilityForTimeout * (timeForFirstLost+timeForTimeout-0.5*RTT+timeForTwoPartPacket);
-                
-        }
-        for (let i = pknBeforeBlock + 1; i < N1; i++) {
-                let transmitTime = (i-1)*(1-loss)*timeForPacket;
-                let retransmitTime = transmitTime + RTT + Math.min(4,N1-i+1)*timeForPacket;
-                let timeForFirstLost = retransmitTime + RTT - timeForTwoPartPacket;
-                let probabilityForFirstLost = (Math.pow(1-loss*loss, i-1) * (loss*(1-loss)) * Math.pow(1-loss, N1-i));
-
-                let timeForSecondLost = timeForFirstLost + RTT + 3 * timeForPacket;
-                let probabilityForSecondLost = loss*loss;
-                if (timeForFirstLost > 0) {
-                        blockTime += probabilityForFirstLost * timeForFirstLost;
-                        probabilityWithBlock += probabilityForFirstLost;
-                }
-                if (timeForSecondLost > 0) {
-                        blockTime += probabilityForSecondLost * timeForSecondLost;
-                        probabilityWithBlock += probabilityForSecondLost;
-                }
-                totalTime += probabilityForFirstLost * (timeForFirstLost-0.5*RTT+timeForTwoPartPacket);
-                totalTime += probabilityForSecondLost * (timeForSecondLost-0.5*RTT+timeForTwoPartPacket);
-                
-        }
-
-        if (start + 131072 >= bitrate * videoChunkLength / 8) {
-                blockTime += calculateRetransmitTime(start, bandwidth, loss, RTT, PTO, RTO, bitrate);
-                return blockTime;
-        }
-        if (1 - probabilityWithBlock > 0) {
-            blockTime += (1 - probabilityWithBlock) * calculateBlockTimeWithoutBlock(start, bandwidth, loss, RTT, PTO, RTO, bitrate, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock);
-        }
-        if (probabilityWithBlock > 0) {
-            blockTime += probabilityWithBlock * calculateBlockTimeWithBlock(start, bandwidth, loss, RTT, PTO, RTO, blockTime, totalTime, blockTimeWithoutBlock, blockProbabilityWithoutBlock, totalTimeWithoutBlock, bitrate);
-        }
-        return blockTime;
-    }
-
-    function calculateRetransmitTime(start, bandwidth, loss, RTT, PTO, RTO, bitrate) {
-        let time = 0;
-        let timeForPacket = MTU / bandwidth;
-        let timeForTimeout = calculateTimeForTimeout(timeForPacket, loss, PTO, RTO);
-
-        let N1 = (bitrate * videoChunkLength / 8 - start) / MTU + 1;
-        let timeForTwoPartPacket = (bitrate * videoChunkLength / 8 - start) * (1-loss) / bandwidth;
-
-        for (let i = 1; i < N1; i++) {
-                let transmitTime = (i-1)*(1-loss)*timeForPacket;
-                let retransmitTime = transmitTime + RTT + Math.min(4,N1-i+1)*timeForPacket;
-
-                let timeForFirstLost = (retransmitTime - timeForTwoPartPacket) > 0 ? retransmitTime - timeForTwoPartPacket : 0;
-                let probabilityForFirstLost = Math.pow(1-loss*loss, i-1) * (loss*(1-loss)) * Math.pow(1-loss, N1-i);
-                time += probabilityForFirstLost * timeForFirstLost;
-
-                let timeForSecondLost = (timeForFirstLost + 2 * RTT) > 0 ? timeForFirstLost + 2 * RTT : 0;
-                let probabilityForSecondLost = loss*loss*(1-loss) * (Math.pow(1-loss*loss*loss, i-1)*Math.pow(1-loss*loss, N1-i)-Math.pow(1-loss*loss, i-1)*Math.pow(1-loss, N1-i));
-                time += probabilityForSecondLost * timeForSecondLost;
-
-                let probabilityForTimeout = loss*loss*(1-loss) * Math.pow(1-loss*loss, i-1)*Math.pow(1-loss, N1-i);
-                time += probabilityForTimeout * (timeForFirstLost+timeForTimeout);
+            time += probabilityForSecondLostTriggerPTO * timeForSecondLostTriggerPTO;
+            time += probabilityForSecondLostTriggerFastRetransmit * timeForSecondLostTriggerFastRetransmit;
+            // time += probabilityForSecondLost * timeForSecondLost;
         };
-
-        time += loss*(1-loss) * (Math.pow(1-loss*loss, N1-1)-Math.pow(1-loss, N1-1)) * 3*RTT;
-        time += loss*(1-loss) * Math.pow(1-loss, N1-1) * (timeForTimeout+RTT);
-
         return time; 
     }
 
-    function calculateDownloadTimeFromParameter(bandwidth, loss, RTT, PTO, RTO, bitrate) {
-        bandwidth = bandwidth * 1166 / 1258;
+    function calculateDownloadTimeFromParameter(bandwidth, loss, RTT, PTO, RTO, chunkSize) {
+        bandwidth = bandwidth * MTU / MaxPacketSize;
 
         let time = 0;
-        time += RTT + bitrate * videoChunkLength / bandwidth;
-
-        if (bitrate * videoChunkLength / 8 <= 131072) {
-            time += calculateRetransmitTime(0, bandwidth, loss, RTT, PTO, RTO, bitrate);
-            return time;
-        }
-
-        let [a, b, c] = calculate(bandwidth, loss, RTT);
-
-        time += calculateBlockTimeWithoutBlock(-1, bandwidth, loss, RTT, PTO, RTO, bitrate, a, b, c);
+        time += RTT + (chunkSize * 8 - bandwidth * RTT) / bandwidth / (1 - loss);
+        // time += RTT + (chunkSize * 8 - bandwidth * RTT) / bandwidth;
+        // time += (chunkSize * 8 - bandwidth * RTT) / bandwidth / (1 - loss);
+        time += calculateTailRetransmitTime(bandwidth, loss, RTT, PTO, RTO, chunkSize);
+        // time += RTT + chunkSize * 8 / bandwidth / (1 - loss);
 
         return time;
     }
@@ -401,13 +238,17 @@ function ProphetRuleClass() {
             bitrateSum,
             smoothnessDiffs,
             downloadTime,
+            downloadTimeForFirstChunk,
+            downloadTimeSelected,
             lastBitrate;
 
         if (isNaN(throughput)) {
             return switchRequest;
         }
         
-        // console.log('prophet rule', window.bandwidth_xquic, window.loss_xquic, window.rtt_xquic, window.pto_xquic, window.rto_xquic);
+        console.log('prophet rule', window.bandwidth_xquic, window.loss_xquic, window.rtt_xquic, window.pto_xquic, window.rto_xquic);
+        chunkNumber++;
+        // console.log('chunkNumber: ', chunkNumber);
         switch (TestState.state) {
             case TEST_STATE_STARTUP:
                 // console.log("TEST_STATE_STARTUP");
@@ -424,7 +265,7 @@ function ProphetRuleClass() {
                 switchRequest.reason.throughput = safeThroughput;
 
                 TestState.lastQuality = cur;
-                if (bufferLevel >= videoChunkLength) {
+                if (chunkNumber >= 5) {
                     TestState.state = TEST_STATE_STEADY;
                 }
                 break;
@@ -433,6 +274,7 @@ function ProphetRuleClass() {
                 // console.log("TEST_STATE_STEADY");
                 // console.log("sequence length:%d", TestState.chunkBitrateSequenceOptions.length);
                 // const startTime1 = performance.now();
+                // if (chunkNumber != 20 && chunkNumber != 21) {
                 for (let bitrateSequence of TestState.chunkBitrateSequenceOptions) {
                     // const startTime2 = performance.now();
                     let newBufferLevel = bufferLevel;
@@ -441,18 +283,28 @@ function ProphetRuleClass() {
                     bitrateSum = 0;
                     smoothnessDiffs = 0;
                     lastBitrate = TestState.lastQuality;
+                    downloadTimeForFirstChunk = 0;
 
-                    for (let i = 0; i< horizon; i++) {
+                    for (let i = 0; i < horizon; i++) {
                         let bitrate = bitrateSequence[i];
-                        downloadTime = calculateDownloadTimeFromParameter(Math.max(window.bandwidth_xquic,throughput), 
+                        downloadTime = calculateDownloadTimeFromParameter(window.bandwidth_xquic, 
                                                                         window.loss_xquic, 
                                                                         window.rtt_xquic, 
                                                                         window.pto_xquic, 
                                                                         window.rto_xquic, 
-                                                                        TestState.bitrates[bitrate]);
+                                                                        videoChunkSize[bitrate][chunkNumber-1]);
+                        // console.log('prophet rule', Math.max(window.bandwidth_xquic,throughput), window.loss_xquic, window.rtt_xquic, window.pto_xquic, window.rto_xquic, TestState.bitrates[bitrate]);
+                        // downloadTime *= 1 + videoChunkSize[9][chunkNumber-1] / videoChunkSize[bitrate][chunkNumber-1];
+                        if (i == 0) {
+                            downloadTimeForFirstChunk = downloadTime;
+                            // downloadTimeForFirstChunk = downloadTime + window.rtt_xquic;
+                        }
+                        downloadTime *= 1 + videoChunkSize[9][chunkNumber-1] / videoChunkSize[bitrate][chunkNumber-1];
+                        // downloadTime += window.rtt_xquic;
                         // console.log('bandwidth_xquic:',window.bandwidth_xquic,'throughput:',throughput);
-                        // console.log('downloadTime:',downloadTime,'bufferLevel:',newBufferLevel);
+                        // console.log('downloadTime:',downloadTime,'bitrateIndex:', bitrate);
                         // downloadTime = TestState.bitrates[bitrate] * videoChunkLength / throughput;
+                        downloadTime = downloadTime * coefficient;
                         if (downloadTime > newBufferLevel) {
                             rebuffer += downloadTime - newBufferLevel;
                             newBufferLevel = 0;
@@ -472,12 +324,52 @@ function ProphetRuleClass() {
                     if (QoE >= maxQoE) {
                         // console.log('preSelect:',bitrateSequenceSelected[0],'preQoE:',maxQoE,'nowSelect:',bitrateSequence[0],'nowQoE:',QoE);
                         bitrateSequenceSelected = bitrateSequence;
+                        downloadTimeSelected = downloadTimeForFirstChunk;
+                        // console.log('QoE', QoE, bitrateSequenceSelected[0], bitrateSequenceSelected[1], 'downloadTimeSelected', downloadTimeSelected);
+                        // console.log('downloadTimeFromProphetRule', downloadTimeSelected);
                         maxQoE = QoE;
                     }
                     // const endTime2 = performance.now();
                     // const executionTime2 = endTime2 - startTime2;
-                    // console.log('代码运行时间：', executionTime2, '毫秒');
+                    // console.log('代码运行时间：', executionTime2, '秒');
                 }
+                // }
+                // else if (chunkNumber == 20) {
+                //     let bitrate = 4;
+                //     bitrateSequenceSelected = [4,4];
+
+                //     downloadTimeSelected = calculateDownloadTimeFromParameter(Math.max(window.bandwidth_xquic,throughput), 
+                //                                                     window.loss_xquic, 
+                //                                                     window.rtt_xquic, 
+                //                                                     window.pto_xquic, 
+                //                                                     window.rto_xquic, 
+                //                                                 TestState.bitrates[bitrate]);
+
+                //     console.log('for the 20th chunk, select quality 4');
+                // }
+                // else if (chunkNumber == 21) {
+                //     let bitrate = 5;
+                //     bitrateSequenceSelected = [5,5];
+
+                //     downloadTimeSelected = calculateDownloadTimeFromParameter(Math.max(window.bandwidth_xquic,throughput), 
+                //                                                     window.loss_xquic, 
+                //                                                     window.rtt_xquic, 
+                //                                                     window.pto_xquic, 
+                //                                                     window.rto_xquic, 
+                //                                                 TestState.bitrates[bitrate]);
+
+                //     console.log('for the 21th chunk, select quality 5');
+                // }
+                // console.log('downloadTimePredictFromProphetRule', window.downloadTimePredict, window.downloadTimePredict.length);
+                // console.log('downloadTimeFromProphetRule', downloadTimeSelected);
+                window.downloadTimePredict.splice(window.downloadTimePredict.length, 0, [downloadTimeSelected, bitrateSequenceSelected[0], chunkNumber]);
+                console.log(downloadTimeSelected, downloadTimeSelected * coefficient, bitrateSequenceSelected[0], chunkNumber);
+                // console.log('push', [downloadTimeSelected, chunkNumber]);
+                // console.log(window.downloadTimePredict[30]);
+                // console.log(window.downloadTimePredict[50]);
+                // console.log('add a downloadTimePredict');
+                // console.log('downloadTimeSelected', downloadTimeSelected);
+                // console.log('downloadTimePredictFromProphetRule', window.downloadTimePredict, window.downloadTimePredict.length);
                 // const endTime1 = performance.now();
                 // const executionTime1 = endTime1 - startTime1;
                 // console.log('代码总运行时间：', executionTime1, '毫秒');

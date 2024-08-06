@@ -35,6 +35,7 @@
     <script src="app/rules/DownloadRatioRule.js"></script>
     <script src="app/rules/ThroughputRule.js"></script>
     <script src="app/rules/ProphetRule.js"></script>
+    <script src="app/rules/MPCRule.js"></script>
     <!-- <script src="alignVideoPlayTime.js"></script> -->
 
     <!-- Google Cast -->
@@ -1008,14 +1009,14 @@
                                     :</label> <span style="font-size: 24px;">{{videoAverageBitrate | number:0}} kbps</span>
                             </div>
 
-                            <!-- <div class="text-success">
+                            <div class="text-success">
                                 <input id="videoRebufferTimeCB" type="checkbox" ng-model="chartState.video.rebufferTime.selected"
                                        ng-change="enableChartByName('rebufferTime', 'video')" class="checkbox-large">
                                 <label class="text-primary" for="videoRebufferTimeCB" data-toggle="tooltip"
                                        data-placement="top"
                                        title="The total rebuffer time of the video" style="font-size: 24px;">卡顿时间
-                                    :</label> <span style="font-size: 24px;">{{videoRebufferTime | number:2}} s</span>
-                            </div> -->
+                                    :</label> <span style="font-size: 24px;">{{videoRebufferTime | number:2}} ms</span>
+                            </div>
 
                             <!-- <div class="text-success">
                                 <input id="videoPendingIndexCB" type="checkbox"

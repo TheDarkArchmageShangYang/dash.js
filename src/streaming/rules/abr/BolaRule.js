@@ -57,7 +57,7 @@ const MINIMUM_BUFFER_PER_BITRATE_LEVEL_S = 2;
 const PLACEHOLDER_BUFFER_DECAY = 0.99; // Make sure placeholder buffer does not stick around too long.
 
 function BolaRule(config) {
-
+    console.log('BOLA is working');
     config = config || {};
     const context = this.context;
 

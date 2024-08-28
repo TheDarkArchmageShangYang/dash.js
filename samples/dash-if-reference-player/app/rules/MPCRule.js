@@ -55,8 +55,8 @@ function MPCRuleClass() {
     const horizon = 5;
     const videoChunkLength = 2000;
     const rebufferPenalty = 3;
-    // const setBitrates = [1,3,4,5,6];
-    const setBitrates = [0,1,2,3,4];
+    const setBitrates = [1,3,4,5,6];
+    // const setBitrates = [0,1,2,3,4];
     
     let chunkNumber = 1;
 

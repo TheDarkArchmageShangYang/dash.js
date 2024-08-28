@@ -2,7 +2,7 @@
 
 var app = angular.module('DashPlayer', ['DashSourcesService', 'DashContributorsService', 'DashIFTestVectorsService', 'angular-flot']); /* jshint ignore:line */
 
-window.mode = 'BOLA';
+window.mode = 'Prophet';
 window.bandwidth_xquic = 1985;
 window.loss_xquic = 0;
 window.rtt_xquic = 0;
@@ -2285,7 +2285,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                         //         console.log(i);
                         //     }
                         // }
-                    if (type == 'video') {
+                    if (type == 'video' && (window.mode === 'MPC' || window.mode === 'Prophet')) {
                         // console.log(httpMetrics.downloadTimeTotal[type].sum, httpMetrics.downloadTimeTotal[type].average, httpMetrics.downloadTimeTotal[type].count);
                         var requests = dashMetrics.getHttpRequests(type);
                         var requestWindow = requests.filter(function (req) {

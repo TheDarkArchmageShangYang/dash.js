@@ -188,6 +188,7 @@ function MPCRuleClass() {
             case TEST_STATE_STEADY:
                 // console.log("TEST_STATE_STEADY");
                 // const startTime1 = performance.now();
+                // if (chunkNumber != 50) {
                 for (let bitrateSequence of TestState.chunkBitrateSequenceOptions) {
                     // const startTime2 = performance.now();
                     let newBufferLevel = bufferLevel;
@@ -234,6 +235,17 @@ function MPCRuleClass() {
                     // const executionTime2 = endTime2 - startTime2;
                     // console.log('代码运行时间：', executionTime2, '毫秒');
                 }
+                // }
+                // else if (chunkNumber == 50) {
+                //     let bitrate = 4;
+                //     bitrateSequenceSelected = [4,4,4];
+
+                //     // downloadTimeSelected = TestState.bitrates[bitrate] * videoChunkLength / throughput;
+                //     downloadTimeSelected = TestState.bitrates[bitrate] * videoChunkLength / window.bandwidth_xquic;
+
+                //     console.log('for the 50th chunk, select quality 4');
+                // }
+
                 window.downloadTimePredict.splice(window.downloadTimePredict.length, 0, [downloadTimeSelected, bitrateSequenceSelected[0], chunkNumber]);
                 // const endTime1 = performance.now();
                 // const executionTime1 = endTime1 - startTime1;

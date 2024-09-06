@@ -572,6 +572,17 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             // console.log('time1:', currentRequest.tresponse.getTime() - currentRequest.trequest.getTime(), 'time2:', currentRequest._tfinish.getTime() - currentRequest.tresponse.getTime());
             console.log('QoE:', $scope.qualitySum - $scope.smoothness - 3 * $scope.rebufferTime);
         }
+        const now = new Date();
+        const hours = now.getHours();    // 获取小时
+        const minutes = now.getMinutes();  // 获取分钟
+        const seconds = now.getSeconds();  // 获取秒
+        const milliseconds = now.getMilliseconds(); // 获取毫秒
+        if (e.request.mediaType == 'video' && e.request.index >= 0) {
+            console.log('receive video chunk', e.request.index, `at 当前时间: ${hours} 时 ${minutes} 分 ${seconds} 秒 ${milliseconds} 毫秒`)
+        }
+        else if (e.request.mediaType == 'audio' && e.request.index >= 0) {
+            console.log('receive audio chunk', e.request.index, `at 当前时间: ${hours} 时 ${minutes} 分 ${seconds} 秒 ${milliseconds} 毫秒`)
+        }
     }, $scope);
 
     ////////////////////////////////////////
@@ -1072,6 +1083,73 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         });
     };
 
+    $scope.updateMetricsFromXquic = function () {
+        // 将 ws:// 替换为 wss:// 以使用安全的 WebSocket 连接
+        const ws = new WebSocket('wss://udpcc-shh.dfshan.net:8001');
+    
+        ws.onmessage = (event) => {
+            const now = new Date();
+            const hours = now.getHours();    // 获取小时
+            const minutes = now.getMinutes();  // 获取分钟
+            const seconds = now.getSeconds();  // 获取秒
+            const milliseconds = now.getMilliseconds(); // 获取毫秒
+
+            // 获取消息内容
+            const message = event.data;
+            // console.log('接收到服务器的信息:', message, `at 当前时间: ${hours} 时 ${minutes} 分 ${seconds} 秒 ${milliseconds} 毫秒`);
+        
+            // 解析消息内容
+            const data = message.split('|');
+            data.forEach(item => {
+                if (!item) return;  // 跳过空字符串
+
+                const [key, value] = item.split(':');
+                if (!value) return;  // 跳过没有值的键
+
+                switch (key) {
+                    case 'bw':
+                        window.bandwidth_xquic = parseFloat(value) / 1000;
+                        break;
+                    case 'loss':
+                        window.loss_xquic = parseFloat(value) / 1000;
+                        break;
+                    case 'rtt':
+                        window.rtt_xquic = parseInt(value, 10) / 1000;
+                        break;
+                    case 'pto':
+                        window.pto_xquic = parseInt(value, 10) / 1000;
+                        break;
+                    case 'rto':
+                        window.rto_xquic = parseInt(value, 10) / 1000;
+                        break;
+                    case 'time':
+                        break;
+                    case 'time1':
+                        break;
+                    default:
+                        console.warn(`未知的键: ${key}`);
+                }
+            });
+
+        
+            // 输出解析后的结果
+            // console.log('bandwidth_xquic:', window.bandwidth_xquic);
+        };
+        
+        // 处理WebSocket打开、关闭和错误事件
+        ws.onopen = () => {
+            console.log('已连接到WebSocket服务器');
+        };
+        
+        ws.onclose = () => {
+            console.log('与WebSocket服务器的连接已关闭');
+        };
+        
+        ws.onerror = (error) => {
+            console.error('WebSocket错误:', error);
+        };
+    }    
+
     $scope.doLoad = function () {
         $scope.initSession();
 
@@ -1209,35 +1287,48 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         $scope.player.enableForcedTextStreaming($scope.initialSettings.forceTextStreaming);
         $scope.controlbar.enable();
 
-        $scope.updateMetricsFromXquic = function() {
-            const regex = /\|bw:(\d+\.\d+)\|loss:(\d+\.\d+)\|rtt:(\d+)\|pto:(\d+)\|rto:(\d+)\|/;
-            fetch('https://udpcc-shh.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
-                .then(function(response) {
-                    return response.text();
-                })
-                .then(function(data) {
-                    let test = data;
-                    const match = test.match(regex);
+        // $scope.updateMetricsFromXquic = function() {
+        //     const now = new Date();
+        //     const hours = now.getHours();    // 获取小时
+        //     const minutes = now.getMinutes();  // 获取分钟
+        //     const seconds = now.getSeconds();  // 获取秒
+        //     const milliseconds = now.getMilliseconds(); // 获取毫秒
+
+        //     const regex = /\|bw:(\d+\.\d+)\|loss:(\d+\.\d+)\|rtt:(\d+)\|pto:(\d+)\|rto:(\d+)\|/;
+        //     fetch('https://udpcc-shh.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
+        //         .then(function(response) {
+        //             return response.text();
+        //         })
+        //         .then(function(data) {
+        //             const now1 = new Date();
+        //             const hours1 = now1.getHours();    // 获取小时
+        //             const minutes1 = now1.getMinutes();  // 获取分钟
+        //             const seconds1 = now1.getSeconds();  // 获取秒
+        //             const milliseconds1 = now1.getMilliseconds(); // 获取毫秒
+
+        //             let test = data;
+        //             const match = test.match(regex);
     
-                    if (match) {
-                        window.bandwidth_xquic = parseFloat(match[1]) / 1000;
-                        // if (parseFloat(match[1]) / 1000 > 1000 && parseFloat(match[1]) / 1000 < 2500) {
-                        //     window.bandwidth_xquic = parseFloat(match[1]) / 1000;
-                        // }
-                        // else {
-                        //     window.bandwidth_xquic = window.bandwidth_xquic + Math.random() * 50 - 25;
-                        // }
-                        $scope.mtpFromXquic = window.bandwidth_xquic;
-                        window.loss_xquic = parseFloat(match[2]);
-                        window.rtt_xquic = parseInt(match[3], 10) / 1000;
-                        window.pto_xquic = parseInt(match[4], 10) / 1000;
-                        window.rto_xquic = parseInt(match[5], 10) / 1000;
-                    }
-                    // console.log('main.js', window.bandwidth_xquic, window.loss_xquic, window.rtt_xquic, window.pto_xquic, window.rto_xquic);
-                    // console.log('Modified request successful:', test);
-                })
-            setTimeout($scope.updateMetricsFromXquic, 1000);
-        }
+        //             if (match) {
+        //                 window.bandwidth_xquic = parseFloat(match[1]) / 1000;
+        //                 // if (parseFloat(match[1]) / 1000 > 1000 && parseFloat(match[1]) / 1000 < 2500) {
+        //                 //     window.bandwidth_xquic = parseFloat(match[1]) / 1000;
+        //                 // }
+        //                 // else {
+        //                 //     window.bandwidth_xquic = window.bandwidth_xquic + Math.random() * 50 - 25;
+        //                 // }
+        //                 $scope.mtpFromXquic = window.bandwidth_xquic;
+        //                 window.loss_xquic = parseFloat(match[2]);
+        //                 window.rtt_xquic = parseInt(match[3], 10) / 1000;
+        //                 window.pto_xquic = parseInt(match[4], 10) / 1000;
+        //                 window.rto_xquic = parseInt(match[5], 10) / 1000;
+        //             }
+        //             console.log('send request at', `当前时间: ${hours} 时 ${minutes} 分 ${seconds} 秒 ${milliseconds} 毫秒`);
+        //             console.log('get bandwidth:', window.bandwidth_xquic, `at 当前时间: ${hours1} 时 ${minutes1} 分 ${seconds1} 秒 ${milliseconds1} 毫秒`);
+        //             // console.log('Modified request successful:', test);
+        //         })
+        //     setTimeout($scope.updateMetricsFromXquic, 200);
+        // }
         $scope.updateMetricsFromXquic();
     };
 
@@ -2250,7 +2341,9 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             $scope[type + 'DroppedFrames'] = droppedFPS;
             $scope[type + 'LiveLatency'] = liveLatency;
             $scope[type + 'PlaybackRate'] = playbackRate;
-            $scope[type + 'MtpFromXquic'] = $scope.mtpFromXquic;
+            // $scope[type + 'MtpFromXquic'] = $scope.mtpFromXquic;
+            $scope.mtpFromXquic = window.bandwidth_xquic;
+            $scope[type + 'MtpFromXquic'] = window.bandwidth_xquic;
 
             var httpMetrics = calculateHTTPMetrics(type, dashMetrics.getHttpRequests(type));
             if (httpMetrics) {
@@ -2321,32 +2414,17 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                                     j++;
                                 }
                             }
-                            // const reversedDownloadTimePredict = window.downloadTimePredict.reverse();
-                            // console.log('reverseDownloadTimePredict', reversedDownloadTimePredict);
-                            // const reversedDownloadTimeMeasure = downloadTimeMeasured.reverse();
-
-                            // for (let i = 0; i < reversedDownloadTimePredict.length; i++) {
-                            //     if (reversedDownloadTimePredict[i] !== undefined && reversedDownloadTimeMeasure[i] !== undefined) {
-                            //         downloadTimeError.push(Math.abs(reversedDownloadTimePredict[i] - reversedDownloadTimeMeasure[i]) / reversedDownloadTimeMeasure[i]);
-                            //     }
-                            // }
-
-                            // console.log('downloadTimePredict', window.downloadTimePredict);
-                            // console.log('reversedDownloadTimePredict', reversedDownloadTimePredict);
-                            // const averageDownloadTimePredict = reversedDownloadTimePredict.reduce((acc, error) => acc + error, 0) / reversedDownloadTimePredict.length;
-                            // console.log("Average DownloadTimePredict:", averageDownloadTimePredict);
-
-                            // console.log('downloadTimeMeasure', downloadTimeMeasured);
-                            // console.log('reversedDownloadTimeMeasure', reversedDownloadTimeMeasure);
-                            // const averageDownloadTimeMeasure = reversedDownloadTimeMeasure.reduce((acc, error) => acc + error, 0) / reversedDownloadTimeMeasure.length;
-                            // console.log("Average DownloadTimeMeasure:", averageDownloadTimeMeasure);
-
-                            console.log("Errors:", downloadTimeError);
-                            let averageError1 = downloadTimeError.reduce((aver, error) => aver + error[0], 0) / downloadTimeError.length;
-                            let averageError1Ave = downloadTimeError.reduce((aver, error) => aver + error[0] * error[1], 0) / downloadTimeError.length;
-                            // console.log("Average Error:", averageError, Math.abs(averageDownloadTimePredict - averageDownloadTimeMeasure) / averageDownloadTimeMeasure);
-                            console.log("Average Error1:", averageError1);
-                            console.log("Average Error1Ave:", averageError1Ave);
+                            const filteredArray1 = window.downloadTimePredict.filter(item => item[2] === 50);
+                            const filteredArray2 = downloadTimeMeasured.filter(item => item[2] === 50);
+                            const filteredArray3 = downloadTimeError.filter(item => item[2] === 50);
+                            if (filteredArray1.length > 0 && filteredArray2.length > 0) {
+                                console.log('50号视频块:预测下载时间:', filteredArray1[0], '实际下载时间:', filteredArray2[0], '误差:', filteredArray3[0]);
+                            }
+                            // let averageError1 = downloadTimeError.reduce((aver, error) => aver + error[0], 0) / downloadTimeError.length;
+                            // let averageError1Ave = downloadTimeError.reduce((aver, error) => aver + error[0] * error[1], 0) / downloadTimeError.length;
+                            // console.log("Errors:", downloadTimeError);
+                            // console.log("Average Error1:", averageError1);
+                            // console.log("Average Error1Ave:", averageError1Ave);
                         }
                     }
                 }

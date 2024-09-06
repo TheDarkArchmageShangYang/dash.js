@@ -1071,7 +1071,7 @@
                                        title="The minimum, average and maximum ratio of the segment playback time to total download time over the last 4 segments">Ratio
                                     (min|avg|max) :</label> {{videoRatio}}
                             </div> -->
-                            <!-- <div class="text-success" ng-show="isCMSDEnabled()">
+                            <div class="text-success" ng-show="isCMSDEnabled()">
                                 <input id="mtpCB" type="checkbox"
                                        ng-model="chartState.video.mtp.selected"
                                        ng-change="enableChartByName('mtp', 'video')" class="checkbox-large">
@@ -1079,7 +1079,7 @@
                                        data-placement="top"
                                        title="The measured (averaged) throughput computed in the ABR logic" style="font-size: 24px;">带宽估计(应用层):
                                     </label> <span style="font-size: 24px;">{{videoMtp | number:0}} kbps</span>
-                            </div> -->
+                            </div>
                             <div class="text-success" ng-show="isCMSDEnabled()">
                                 <input id="mtpFromXquicCB" type="checkbox"
                                        ng-model="chartState.video.mtpFromXquic.selected"
@@ -1087,7 +1087,7 @@
                                 <label class="text-primary" for="mtpFromXquicCB" data-toggle="tooltip"
                                        data-placement="top"
                                        title="The measured (averaged) throughput computed in the ABR logic" 
-                                       style="font-size: 24px;">带宽估计:
+                                       style="font-size: 24px;">带宽估计(传输层):
                                     </label> <span style="font-size: 24px;">{{videoMtpFromXquic | number:0}} kbps</span>
                             </div>
                             <!-- <div class="text-success" ng-show="isCMSDEnabled()">

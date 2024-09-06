@@ -211,6 +211,36 @@ function ProphetRuleClass() {
         return time;
     }
 
+    // function updateMetricsFromXquic() {
+    //     const regex = /\|bw:(\d+\.\d+)\|loss:(\d+\.\d+)\|rtt:(\d+)\|pto:(\d+)\|rto:(\d+)\|/;
+    //     fetch('https://udpcc-shh.dfshan.net:8000/samples/dash-if-reference-player/data.txt')
+    //         .then(function(response) {
+    //             return response.text();
+    //         })
+    //         .then(function(data) {
+    //             let test = data;
+    //             const match = test.match(regex);
+
+    //             if (match) {
+    //                 window.bandwidth_xquic = parseFloat(match[1]) / 1000;
+    //                 // if (parseFloat(match[1]) / 1000 > 1000 && parseFloat(match[1]) / 1000 < 2500) {
+    //                 //     window.bandwidth_xquic = parseFloat(match[1]) / 1000;
+    //                 // }
+    //                 // else {
+    //                 //     window.bandwidth_xquic = window.bandwidth_xquic + Math.random() * 50 - 25;
+    //                 // }
+    //                 // $scope.mtpFromXquic = window.bandwidth_xquic;
+    //                 window.loss_xquic = parseFloat(match[2]);
+    //                 window.rtt_xquic = parseInt(match[3], 10) / 1000;
+    //                 window.pto_xquic = parseInt(match[4], 10) / 1000;
+    //                 window.rto_xquic = parseInt(match[5], 10) / 1000;
+    //             }
+    //             // console.log('main.js', window.bandwidth_xquic, window.loss_xquic, window.rtt_xquic, window.pto_xquic, window.rto_xquic);
+    //             // console.log('Modified request successful:', test);
+    //         })
+    //     console.log('updateMetrics finish');
+    // }
+
     function getMaxIndex(rulesContext) {
         const switchRequest = SwitchRequest(context).create();
 
@@ -259,10 +289,21 @@ function ProphetRuleClass() {
         if (isNaN(throughput)) {
             return switchRequest;
         }
+
+        const now = new Date();
+        const hours = now.getHours();    // 获取小时
+        const minutes = now.getMinutes();  // 获取分钟
+        const seconds = now.getSeconds();  // 获取秒
+        const milliseconds = now.getMilliseconds(); // 获取毫秒
+
+        // updateMetricsFromXquic();
+        // console.log('select biterate start');
         
-        console.log('prophet rule', window.bandwidth_xquic, window.loss_xquic, window.rtt_xquic, window.pto_xquic, window.rto_xquic);
+        console.log('prophet rule', window.bandwidth_xquic, window.loss_xquic, window.rtt_xquic, window.pto_xquic, window.rto_xquic, `当前时间: ${hours} 时 ${minutes} 分 ${seconds} 秒 ${milliseconds} 毫秒`);
+        console.log('prophet rule bandwidth:', throughput, `当前时间: ${hours} 时 ${minutes} 分 ${seconds} 秒 ${milliseconds} 毫秒`);
         chunkNumber++;
         // console.log('chunkNumber: ', chunkNumber);
+
         switch (TestState.state) {
             case TEST_STATE_STARTUP:
                 // console.log("TEST_STATE_STARTUP");
@@ -288,7 +329,7 @@ function ProphetRuleClass() {
                 // console.log("TEST_STATE_STEADY");
                 // console.log("sequence length:%d", TestState.chunkBitrateSequenceOptions.length);
                 // const startTime1 = performance.now();
-                // if (chunkNumber != 20 && chunkNumber != 21) {
+                if (chunkNumber != 50) {
                 for (let bitrateSequence of TestState.chunkBitrateSequenceOptions) {
                     // const startTime2 = performance.now();
                     let newBufferLevel = bufferLevel;
@@ -347,33 +388,33 @@ function ProphetRuleClass() {
                     // const executionTime2 = endTime2 - startTime2;
                     // console.log('代码运行时间：', executionTime2, '秒');
                 }
-                // }
-                // else if (chunkNumber == 20) {
-                //     let bitrate = 4;
-                //     bitrateSequenceSelected = [4,4];
+                }
+                else if (chunkNumber == 50) {
+                    let bitrate = 4;
+                    bitrateSequenceSelected = [4,4,4];
 
-                //     downloadTimeSelected = calculateDownloadTimeFromParameter(Math.max(window.bandwidth_xquic,throughput), 
-                //                                                     window.loss_xquic, 
-                //                                                     window.rtt_xquic, 
-                //                                                     window.pto_xquic, 
-                //                                                     window.rto_xquic, 
-                //                                                 TestState.bitrates[bitrate]);
+                    downloadTimeSelected = calculateDownloadTimeFromParameter(window.bandwidth_xquic, 
+                                                                    window.loss_xquic, 
+                                                                    window.rtt_xquic, 
+                                                                    window.pto_xquic, 
+                                                                    window.rto_xquic, 
+                                                                    videoChunkSize[bitrate][chunkNumber-1]);
 
-                //     console.log('for the 20th chunk, select quality 4');
-                // }
-                // else if (chunkNumber == 21) {
-                //     let bitrate = 5;
-                //     bitrateSequenceSelected = [5,5];
+                    console.log('for the 50th chunk, select quality 4');
+                }
+                else if (chunkNumber == 21) {
+                    let bitrate = 5;
+                    bitrateSequenceSelected = [5,5];
 
-                //     downloadTimeSelected = calculateDownloadTimeFromParameter(Math.max(window.bandwidth_xquic,throughput), 
-                //                                                     window.loss_xquic, 
-                //                                                     window.rtt_xquic, 
-                //                                                     window.pto_xquic, 
-                //                                                     window.rto_xquic, 
-                //                                                 TestState.bitrates[bitrate]);
+                    downloadTimeSelected = calculateDownloadTimeFromParameter(Math.max(window.bandwidth_xquic,throughput), 
+                                                                    window.loss_xquic, 
+                                                                    window.rtt_xquic, 
+                                                                    window.pto_xquic, 
+                                                                    window.rto_xquic, 
+                                                                TestState.bitrates[bitrate]);
 
-                //     console.log('for the 21th chunk, select quality 5');
-                // }
+                    console.log('for the 21th chunk, select quality 5');
+                }
                 // console.log('downloadTimePredictFromProphetRule', window.downloadTimePredict, window.downloadTimePredict.length);
                 // console.log('downloadTimeFromProphetRule', downloadTimeSelected);
                 window.downloadTimePredict.splice(window.downloadTimePredict.length, 0, [downloadTimeSelected, bitrateSequenceSelected[0], chunkNumber]);

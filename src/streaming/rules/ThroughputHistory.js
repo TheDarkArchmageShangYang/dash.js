@@ -29,10 +29,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-import Constants from '../constants/Constants';
-import FactoryMaker from '../../core/FactoryMaker';
 import EventBus from '../../core/EventBus';
+import FactoryMaker from '../../core/FactoryMaker';
 import MediaPlayerEvents from '../MediaPlayerEvents';
+import Constants from '../constants/Constants';
 
 // throughput generally stored in kbit/s
 // latency generally stored in ms
@@ -214,7 +214,8 @@ function ThroughputHistory(config) {
 
         arr = arr.slice(-sampleSize); // still works if sampleSize too large
         // arr.length >= 1
-        return arr.reduce((total, elem) => total + elem) / arr.length;
+        return arr.length / arr.reduce((total, elem) => total + 1 / elem, 0);
+        // return arr.reduce((total, elem) => total + elem) / arr.length;
     }
 
     function getAverageEwma(isThroughput, mediaType) {

@@ -38737,10 +38737,10 @@ var factory = _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_0__["default"].getClas
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _constants_Constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants/Constants */ "./src/streaming/constants/Constants.js");
+/* harmony import */ var _core_EventBus__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../core/EventBus */ "./src/core/EventBus.js");
 /* harmony import */ var _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../core/FactoryMaker */ "./src/core/FactoryMaker.js");
-/* harmony import */ var _core_EventBus__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../core/EventBus */ "./src/core/EventBus.js");
-/* harmony import */ var _MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../MediaPlayerEvents */ "./src/streaming/MediaPlayerEvents.js");
+/* harmony import */ var _MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../MediaPlayerEvents */ "./src/streaming/MediaPlayerEvents.js");
+/* harmony import */ var _constants_Constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../constants/Constants */ "./src/streaming/constants/Constants.js");
 /**
  * The copyright in this software is being made available under the BSD License,
  * included below. This software may be subject to other third party and contributor
@@ -38793,7 +38793,7 @@ function ThroughputHistory(config) {
   var EWMA_LATENCY_SLOW_HALF_LIFE_COUNT = 2;
   var EWMA_LATENCY_FAST_HALF_LIFE_COUNT = 1;
   var settings = config.settings;
-  var eventBus = (0,_core_EventBus__WEBPACK_IMPORTED_MODULE_2__["default"])(context).getInstance();
+  var eventBus = (0,_core_EventBus__WEBPACK_IMPORTED_MODULE_0__["default"])(context).getInstance();
   var throughputDict, latencyDict, ewmaThroughputDict, ewmaLatencyDict, ewmaHalfLife;
 
   function setup() {
@@ -38811,10 +38811,10 @@ function ThroughputHistory(config) {
   }
 
   function isCachedResponse(mediaType, latencyMs, downloadTimeMs) {
-    if (mediaType === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].VIDEO) {
-      return downloadTimeMs < settings.get().streaming.cacheLoadThresholds[_constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].VIDEO];
-    } else if (mediaType === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].AUDIO) {
-      return downloadTimeMs < settings.get().streaming.cacheLoadThresholds[_constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].AUDIO];
+    if (mediaType === _constants_Constants__WEBPACK_IMPORTED_MODULE_3__["default"].VIDEO) {
+      return downloadTimeMs < settings.get().streaming.cacheLoadThresholds[_constants_Constants__WEBPACK_IMPORTED_MODULE_3__["default"].VIDEO];
+    } else if (mediaType === _constants_Constants__WEBPACK_IMPORTED_MODULE_3__["default"].AUDIO) {
+      return downloadTimeMs < settings.get().streaming.cacheLoadThresholds[_constants_Constants__WEBPACK_IMPORTED_MODULE_3__["default"].AUDIO];
     }
   }
 
@@ -38832,7 +38832,7 @@ function ThroughputHistory(config) {
     var throughputMeasureTime = 0,
         throughput = 0;
 
-    if (httpRequest._fileLoaderType && httpRequest._fileLoaderType === _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].FILE_LOADER_TYPES.FETCH) {
+    if (httpRequest._fileLoaderType && httpRequest._fileLoaderType === _constants_Constants__WEBPACK_IMPORTED_MODULE_3__["default"].FILE_LOADER_TYPES.FETCH) {
       throughputMeasureTime = httpRequest.trace.reduce(function (a, b) {
         return a + b.d;
       }, 0);
@@ -38876,7 +38876,7 @@ function ThroughputHistory(config) {
     }
 
     throughputDict[mediaType].push(throughput);
-    eventBus.trigger(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_3__["default"].THROUGHPUT_MEASUREMENT_STORED, {
+    eventBus.trigger(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_2__["default"].THROUGHPUT_MEASUREMENT_STORED, {
       throughput: throughput,
       mediaType: mediaType,
       httpRequest: httpRequest
@@ -38944,7 +38944,7 @@ function ThroughputHistory(config) {
 
   function getAverage(isThroughput, mediaType, isDynamic) {
     // only two moving average methods defined at the moment
-    return settings.get().streaming.abr.movingAverageMethod !== _constants_Constants__WEBPACK_IMPORTED_MODULE_0__["default"].MOVING_AVERAGE_SLIDING_WINDOW ? getAverageEwma(isThroughput, mediaType) : getAverageSlidingWindow(isThroughput, mediaType, isDynamic);
+    return settings.get().streaming.abr.movingAverageMethod !== _constants_Constants__WEBPACK_IMPORTED_MODULE_3__["default"].MOVING_AVERAGE_SLIDING_WINDOW ? getAverageEwma(isThroughput, mediaType) : getAverageSlidingWindow(isThroughput, mediaType, isDynamic);
   }
 
   function getAverageSlidingWindow(isThroughput, mediaType, isDynamic) {
@@ -38959,9 +38959,9 @@ function ThroughputHistory(config) {
     arr = arr.slice(-sampleSize); // still works if sampleSize too large
     // arr.length >= 1
 
-    return arr.reduce(function (total, elem) {
-      return total + elem;
-    }) / arr.length;
+    return arr.length / arr.reduce(function (total, elem) {
+      return total + 1 / elem;
+    }, 0); // return arr.reduce((total, elem) => total + elem) / arr.length;
   }
 
   function getAverageEwma(isThroughput, mediaType) {

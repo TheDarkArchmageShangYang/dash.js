@@ -38954,11 +38954,11 @@ function ThroughputHistory(config) {
 
     if (sampleSize === 0 || !arr || arr.length === 0) {
       return NaN;
-    }
-
-    arr = arr.slice(-sampleSize); // still works if sampleSize too large
+    } // arr = arr.slice(-sampleSize); // still works if sampleSize too large
     // arr.length >= 1
 
+
+    arr = arr.slice(-5);
     return arr.length / arr.reduce(function (total, elem) {
       return total + 1 / elem;
     }, 0); // return arr.reduce((total, elem) => total + elem) / arr.length;

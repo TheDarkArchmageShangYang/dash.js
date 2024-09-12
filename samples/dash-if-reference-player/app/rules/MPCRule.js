@@ -57,6 +57,8 @@ function MPCRuleClass() {
     const rebufferPenalty = 3;
     const setBitrates = [1,3,4,5,6];
     // const setBitrates = [0,1,2,3,4];
+
+    let bandwidth = [];
     
     let chunkNumber = 1;
 
@@ -141,6 +143,7 @@ function MPCRuleClass() {
 
         const bufferLevel = dashMetrics.getCurrentBufferLevel(mediaType) * 1000; // 原单位s，现单位ms
         const throughput = throughputHistory.getAverageThroughput(mediaType, isDynamic); // 单位kbps
+        bandwidth.push(throughput);
         const safeThroughput = throughputHistory.getSafeAverageThroughput(mediaType, isDynamic);
         const latency = throughputHistory.getAverageLatency(mediaType);
         let quality;
@@ -188,6 +191,8 @@ function MPCRuleClass() {
             case TEST_STATE_STEADY:
                 // console.log("TEST_STATE_STEADY");
                 // const startTime1 = performance.now();
+                let lastFiveThroughput = bandwidth.slice(-5);
+                let harmonicBandwidth = lastFiveThroughput.length / lastFiveThroughput.reduce((acc, val) => acc + (1 / val), 0)
                 // if (chunkNumber != 50) {
                 for (let bitrateSequence of TestState.chunkBitrateSequenceOptions) {
                     // const startTime2 = performance.now();
@@ -203,7 +208,7 @@ function MPCRuleClass() {
                         let bitrate = bitrateSequence[i];
 
                         // downloadTime = calculateDownloadTimeFromParameter(throughput, loss, RTT, PTO, RTO, TestState.bitrates[bitrate]);
-                        downloadTime = TestState.bitrates[bitrate] * videoChunkLength / throughput;
+                        downloadTime = TestState.bitrates[bitrate] * videoChunkLength / harmonicBandwidth;
                         if (i == 0) {
                             downloadTimeForFirstChunk = downloadTime;
                         }
@@ -237,13 +242,13 @@ function MPCRuleClass() {
                 }
                 // }
                 // else if (chunkNumber == 50) {
-                //     let bitrate = 4;
-                //     bitrateSequenceSelected = [4,4,4];
+                //     let bitrate = 5;
+                //     bitrateSequenceSelected = [5,5,5];
 
-                //     // downloadTimeSelected = TestState.bitrates[bitrate] * videoChunkLength / throughput;
-                //     downloadTimeSelected = TestState.bitrates[bitrate] * videoChunkLength / window.bandwidth_xquic;
+                //     downloadTimeSelected = TestState.bitrates[bitrate] * videoChunkLength / harmonicBandwidth;
+                //     // downloadTimeSelected = TestState.bitrates[bitrate] * videoChunkLength / window.bandwidth_xquic;
 
-                //     console.log('for the 50th chunk, select quality 4');
+                //     console.log('for the 50th chunk, select quality 5');
                 // }
 
                 window.downloadTimePredict.splice(window.downloadTimePredict.length, 0, [downloadTimeSelected, bitrateSequenceSelected[0], chunkNumber]);

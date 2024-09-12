@@ -383,6 +383,33 @@ function BolaRule(config) {
         }
     }
 
+    function test(bolaState) {
+        const Vp = bolaState.Vp;
+        const gp = bolaState.gp;
+        const utilities = bolaState.utilities;
+        const bitrates = bolaState.bitrates;
+
+        let score = [];
+    
+        // Solve for bufferLevel where s1 = s2
+        score[0] = Vp * (utilities[1] + gp);
+        score[1] = Vp * (utilities[3] + gp);
+        score[2] = Vp * (utilities[4] + gp);
+        score[3] = Vp * (utilities[5] + gp);
+        score[4] = Vp * (utilities[6] + gp);
+        
+        console.log('比特率从300变成750的缓存阈值为', (score[0] * bitrates[3] - score[1] * bitrates[1]) / (bitrates[3] - bitrates[1]));
+        console.log('比特率从750变成1200的缓存阈值为', (score[1] * bitrates[4] - score[2] * bitrates[3]) / (bitrates[4] - bitrates[3]));
+        console.log('比特率从1200变成1850的缓存阈值为', (score[2] * bitrates[5] - score[3] * bitrates[4]) / (bitrates[5] - bitrates[4]));
+        console.log('比特率从1850变成2850的缓存阈值为', (score[3] * bitrates[6] - score[4] * bitrates[5]) / (bitrates[6] - bitrates[5]));
+
+        console.log('比特率为300,最大缓存时间为', maxBufferLevelForQuality(bolaState, 1));
+        console.log('比特率为750,最大缓存时间为', maxBufferLevelForQuality(bolaState, 3));
+        console.log('比特率为1200,最大缓存时间为', maxBufferLevelForQuality(bolaState, 4));
+        console.log('比特率为1850,最大缓存时间为', maxBufferLevelForQuality(bolaState, 5));
+        console.log('比特率为2850,最大缓存时间为', maxBufferLevelForQuality(bolaState, 6));
+    }
+
     function getMaxIndex(rulesContext) {
         const switchRequest = SwitchRequest(context).create();
 
@@ -470,6 +497,7 @@ function BolaRule(config) {
                 // We do not want to overfill buffer with low quality chunks.
                 // Note that there will be no delay if buffer level is below MINIMUM_BUFFER_S, probably even with some margin higher than MINIMUM_BUFFER_S.
                 let delayS = Math.max(0, bufferLevel + bolaState.placeholderBuffer - maxBufferLevelForQuality(bolaState, quality));
+                console.log('delayS:', delayS, 'bufferLevel:', bufferLevel, 'placeholderBuffer:', bolaState.placeholderBuffer)
 
                 // First reduce placeholder buffer, then tell schedule controller to pause.
                 if (delayS <= bolaState.placeholderBuffer) {

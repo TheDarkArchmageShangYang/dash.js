@@ -39504,15 +39504,15 @@ AbandonRequestsRule.__dashjs_factory_name = 'AbandonRequestsRule';
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../constants/MetricsConstants */ "./src/streaming/constants/MetricsConstants.js");
-/* harmony import */ var _SwitchRequest__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../SwitchRequest */ "./src/streaming/rules/SwitchRequest.js");
+/* harmony import */ var _core_Debug__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../core/Debug */ "./src/core/Debug.js");
+/* harmony import */ var _core_EventBus__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../core/EventBus */ "./src/core/EventBus.js");
 /* harmony import */ var _core_FactoryMaker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../core/FactoryMaker */ "./src/core/FactoryMaker.js");
-/* harmony import */ var _vo_metrics_HTTPRequest__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../vo/metrics/HTTPRequest */ "./src/streaming/vo/metrics/HTTPRequest.js");
-/* harmony import */ var _core_EventBus__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../core/EventBus */ "./src/core/EventBus.js");
-/* harmony import */ var _core_events_Events__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../core/events/Events */ "./src/core/events/Events.js");
-/* harmony import */ var _core_Debug__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../core/Debug */ "./src/core/Debug.js");
-/* harmony import */ var _MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../MediaPlayerEvents */ "./src/streaming/MediaPlayerEvents.js");
-/* harmony import */ var _constants_Constants__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../constants/Constants */ "./src/streaming/constants/Constants.js");
+/* harmony import */ var _core_events_Events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../core/events/Events */ "./src/core/events/Events.js");
+/* harmony import */ var _MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../MediaPlayerEvents */ "./src/streaming/MediaPlayerEvents.js");
+/* harmony import */ var _constants_Constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../constants/Constants */ "./src/streaming/constants/Constants.js");
+/* harmony import */ var _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../constants/MetricsConstants */ "./src/streaming/constants/MetricsConstants.js");
+/* harmony import */ var _vo_metrics_HTTPRequest__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../vo/metrics/HTTPRequest */ "./src/streaming/vo/metrics/HTTPRequest.js");
+/* harmony import */ var _SwitchRequest__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../SwitchRequest */ "./src/streaming/rules/SwitchRequest.js");
 /**
  * The copyright in this software is being made available under the BSD License,
  * included below. This software may be subject to other third party and contributor
@@ -39573,18 +39573,18 @@ function BolaRule(config) {
   var context = this.context;
   var dashMetrics = config.dashMetrics;
   var mediaPlayerModel = config.mediaPlayerModel;
-  var eventBus = (0,_core_EventBus__WEBPACK_IMPORTED_MODULE_4__["default"])(context).getInstance();
+  var eventBus = (0,_core_EventBus__WEBPACK_IMPORTED_MODULE_1__["default"])(context).getInstance();
   var instance, logger, bolaStateDict;
 
   function setup() {
-    logger = (0,_core_Debug__WEBPACK_IMPORTED_MODULE_6__["default"])(context).getInstance().getLogger(instance);
+    logger = (0,_core_Debug__WEBPACK_IMPORTED_MODULE_0__["default"])(context).getInstance().getLogger(instance);
     resetInitialSettings();
-    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].BUFFER_EMPTY, onBufferEmpty, instance);
-    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].PLAYBACK_SEEKING, onPlaybackSeeking, instance);
-    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].METRIC_ADDED, onMetricAdded, instance);
-    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].QUALITY_CHANGE_REQUESTED, onQualityChangeRequested, instance);
-    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].FRAGMENT_LOADING_ABANDONED, onFragmentLoadingAbandoned, instance);
-    eventBus.on(_core_events_Events__WEBPACK_IMPORTED_MODULE_5__["default"].MEDIA_FRAGMENT_LOADED, onMediaFragmentLoaded, instance);
+    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_EMPTY, onBufferEmpty, instance);
+    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].PLAYBACK_SEEKING, onPlaybackSeeking, instance);
+    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].METRIC_ADDED, onMetricAdded, instance);
+    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].QUALITY_CHANGE_REQUESTED, onQualityChangeRequested, instance);
+    eventBus.on(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].FRAGMENT_LOADING_ABANDONED, onFragmentLoadingAbandoned, instance);
+    eventBus.on(_core_events_Events__WEBPACK_IMPORTED_MODULE_3__["default"].MEDIA_FRAGMENT_LOADED, onMediaFragmentLoaded, instance);
   }
 
   function utilitiesFromBitrates(bitrates) {
@@ -39647,6 +39647,7 @@ function BolaRule(config) {
       clearBolaStateOnSeek(initialState);
     }
 
+    test(initialState);
     return initialState;
   }
 
@@ -39780,7 +39781,7 @@ function BolaRule(config) {
     // if we rebuffer, we don't want the placeholder buffer to artificially raise BOLA quality
     var mediaType = e.mediaType; // if audio buffer runs empty (due to track switch for example) then reset placeholder buffer only for audio (to avoid decrease video BOLA quality)
 
-    var stateDict = mediaType === _constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].AUDIO ? [_constants_Constants__WEBPACK_IMPORTED_MODULE_8__["default"].AUDIO] : bolaStateDict;
+    var stateDict = mediaType === _constants_Constants__WEBPACK_IMPORTED_MODULE_5__["default"].AUDIO ? [_constants_Constants__WEBPACK_IMPORTED_MODULE_5__["default"].AUDIO] : bolaStateDict;
 
     for (var _mediaType in stateDict) {
       if (bolaStateDict.hasOwnProperty(_mediaType) && bolaStateDict[_mediaType].state === BOLA_STATE_STEADY) {
@@ -39828,7 +39829,7 @@ function BolaRule(config) {
   }
 
   function onMetricAdded(e) {
-    if (e && e.metric === _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_0__["default"].HTTP_REQUEST && e.value && e.value.type === _vo_metrics_HTTPRequest__WEBPACK_IMPORTED_MODULE_3__.HTTPRequest.MEDIA_SEGMENT_TYPE && e.value.trace && e.value.trace.length) {
+    if (e && e.metric === _constants_MetricsConstants__WEBPACK_IMPORTED_MODULE_6__["default"].HTTP_REQUEST && e.value && e.value.type === _vo_metrics_HTTPRequest__WEBPACK_IMPORTED_MODULE_7__.HTTPRequest.MEDIA_SEGMENT_TYPE && e.value.trace && e.value.trace.length) {
       var bolaState = bolaStateDict[e.mediaType];
 
       if (bolaState && bolaState.state !== BOLA_STATE_ONE_BITRATE) {
@@ -39908,8 +39909,31 @@ function BolaRule(config) {
     }
   }
 
+  function test(bolaState) {
+    var Vp = bolaState.Vp;
+    var gp = bolaState.gp;
+    var utilities = bolaState.utilities;
+    var bitrates = bolaState.bitrates;
+    var score = []; // Solve for bufferLevel where s1 = s2
+
+    score[0] = Vp * (utilities[1] + gp);
+    score[1] = Vp * (utilities[3] + gp);
+    score[2] = Vp * (utilities[4] + gp);
+    score[3] = Vp * (utilities[5] + gp);
+    score[4] = Vp * (utilities[6] + gp);
+    console.log('比特率从300变成750的缓存阈值为', (score[0] * bitrates[3] - score[1] * bitrates[1]) / (bitrates[3] - bitrates[1]));
+    console.log('比特率从750变成1200的缓存阈值为', (score[1] * bitrates[4] - score[2] * bitrates[3]) / (bitrates[4] - bitrates[3]));
+    console.log('比特率从1200变成1850的缓存阈值为', (score[2] * bitrates[5] - score[3] * bitrates[4]) / (bitrates[5] - bitrates[4]));
+    console.log('比特率从1850变成2850的缓存阈值为', (score[3] * bitrates[6] - score[4] * bitrates[5]) / (bitrates[6] - bitrates[5]));
+    console.log('比特率为300,最大缓存时间为', maxBufferLevelForQuality(bolaState, 1));
+    console.log('比特率为750,最大缓存时间为', maxBufferLevelForQuality(bolaState, 3));
+    console.log('比特率为1200,最大缓存时间为', maxBufferLevelForQuality(bolaState, 4));
+    console.log('比特率为1850,最大缓存时间为', maxBufferLevelForQuality(bolaState, 5));
+    console.log('比特率为2850,最大缓存时间为', maxBufferLevelForQuality(bolaState, 6));
+  }
+
   function getMaxIndex(rulesContext) {
-    var switchRequest = (0,_SwitchRequest__WEBPACK_IMPORTED_MODULE_1__["default"])(context).create();
+    var switchRequest = (0,_SwitchRequest__WEBPACK_IMPORTED_MODULE_8__["default"])(context).create();
 
     if (!rulesContext || !rulesContext.hasOwnProperty('getMediaInfo') || !rulesContext.hasOwnProperty('getMediaType') || !rulesContext.hasOwnProperty('getScheduleController') || !rulesContext.hasOwnProperty('getStreamInfo') || !rulesContext.hasOwnProperty('getAbrController') || !rulesContext.hasOwnProperty('useBufferOccupancyABR')) {
       return switchRequest;
@@ -39987,7 +40011,8 @@ function BolaRule(config) {
         // Note that there will be no delay if buffer level is below MINIMUM_BUFFER_S, probably even with some margin higher than MINIMUM_BUFFER_S.
 
 
-        var delayS = Math.max(0, bufferLevel + bolaState.placeholderBuffer - maxBufferLevelForQuality(bolaState, quality)); // First reduce placeholder buffer, then tell schedule controller to pause.
+        var delayS = Math.max(0, bufferLevel + bolaState.placeholderBuffer - maxBufferLevelForQuality(bolaState, quality));
+        console.log('delayS:', delayS, 'bufferLevel:', bufferLevel, 'placeholderBuffer:', bolaState.placeholderBuffer); // First reduce placeholder buffer, then tell schedule controller to pause.
 
         if (delayS <= bolaState.placeholderBuffer) {
           bolaState.placeholderBuffer -= delayS;
@@ -40035,12 +40060,12 @@ function BolaRule(config) {
 
   function reset() {
     resetInitialSettings();
-    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].BUFFER_EMPTY, onBufferEmpty, instance);
-    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].PLAYBACK_SEEKING, onPlaybackSeeking, instance);
-    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].METRIC_ADDED, onMetricAdded, instance);
-    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].QUALITY_CHANGE_REQUESTED, onQualityChangeRequested, instance);
-    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_7__["default"].FRAGMENT_LOADING_ABANDONED, onFragmentLoadingAbandoned, instance);
-    eventBus.off(_core_events_Events__WEBPACK_IMPORTED_MODULE_5__["default"].MEDIA_FRAGMENT_LOADED, onMediaFragmentLoaded, instance);
+    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].BUFFER_EMPTY, onBufferEmpty, instance);
+    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].PLAYBACK_SEEKING, onPlaybackSeeking, instance);
+    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].METRIC_ADDED, onMetricAdded, instance);
+    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].QUALITY_CHANGE_REQUESTED, onQualityChangeRequested, instance);
+    eventBus.off(_MediaPlayerEvents__WEBPACK_IMPORTED_MODULE_4__["default"].FRAGMENT_LOADING_ABANDONED, onFragmentLoadingAbandoned, instance);
+    eventBus.off(_core_events_Events__WEBPACK_IMPORTED_MODULE_3__["default"].MEDIA_FRAGMENT_LOADED, onMediaFragmentLoaded, instance);
   }
 
   instance = {

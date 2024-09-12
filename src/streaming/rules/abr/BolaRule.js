@@ -31,15 +31,15 @@
 
 // For a description of the BOLA adaptive bitrate (ABR) algorithm, see http://arxiv.org/abs/1601.06748
 
-import MetricsConstants from '../../constants/MetricsConstants';
-import SwitchRequest from '../SwitchRequest';
-import FactoryMaker from '../../../core/FactoryMaker';
-import {HTTPRequest} from '../../vo/metrics/HTTPRequest';
-import EventBus from '../../../core/EventBus';
-import Events from '../../../core/events/Events';
 import Debug from '../../../core/Debug';
+import EventBus from '../../../core/EventBus';
+import FactoryMaker from '../../../core/FactoryMaker';
+import Events from '../../../core/events/Events';
 import MediaPlayerEvents from '../../MediaPlayerEvents';
 import Constants from '../../constants/Constants';
+import MetricsConstants from '../../constants/MetricsConstants';
+import { HTTPRequest } from '../../vo/metrics/HTTPRequest';
+import SwitchRequest from '../SwitchRequest';
 
 // BOLA_STATE_ONE_BITRATE   : If there is only one bitrate (or initialization failed), always return NO_CHANGE.
 // BOLA_STATE_STARTUP       : Set placeholder buffer such that we download fragments at most recently measured throughput.
@@ -134,7 +134,7 @@ function BolaRule(config) {
             initialState.lastQuality = 0;
             clearBolaStateOnSeek(initialState);
         }
-
+        test(initialState);
         return initialState;
     }
 

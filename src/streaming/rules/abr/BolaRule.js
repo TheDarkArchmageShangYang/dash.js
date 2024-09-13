@@ -397,6 +397,9 @@ function BolaRule(config) {
         score[2] = Vp * (utilities[4] + gp);
         score[3] = Vp * (utilities[5] + gp);
         score[4] = Vp * (utilities[6] + gp);
+
+        console.log('vp:', Vp, 'gp:', gp);
+        console.log('bitrates:', bitrates, 'utilities:', utilities);
         
         console.log('比特率从300变成750的缓存阈值为', (score[0] * bitrates[3] - score[1] * bitrates[1]) / (bitrates[3] - bitrates[1]));
         console.log('比特率从750变成1200的缓存阈值为', (score[1] * bitrates[4] - score[2] * bitrates[3]) / (bitrates[4] - bitrates[3]));
@@ -487,12 +490,14 @@ function BolaRule(config) {
                 // we want to avoid oscillations
                 // We implement the "BOLA-O" variant: when network bandwidth lies between two encoded bitrate levels, stick to the lowest level.
                 const qualityForThroughput = abrController.getQualityForBitrate(mediaInfo, safeThroughput, streamId, latency);
+                console.log('qualityFromBuffer:', quality, 'qualityFormThroughout:', qualityForThroughput);
                 if (quality > bolaState.lastQuality && quality > qualityForThroughput) {
                     // only intervene if we are trying to *increase* quality to an *unsustainable* level
                     // we are only avoid oscillations - do not drop below last quality
 
                     quality = Math.max(qualityForThroughput, bolaState.lastQuality);
                 }
+                console.log('finally select quality:', quality);
 
                 // We do not want to overfill buffer with low quality chunks.
                 // Note that there will be no delay if buffer level is below MINIMUM_BUFFER_S, probably even with some margin higher than MINIMUM_BUFFER_S.

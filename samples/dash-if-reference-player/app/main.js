@@ -3,10 +3,10 @@
 var app = angular.module('DashPlayer', ['DashSourcesService', 'DashContributorsService', 'DashIFTestVectorsService', 'angular-flot']); /* jshint ignore:line */
 
 //window.mode = 'Prophet';
-// window.mode = 'MPC';
-window.mode = 'BOLA';
+window.mode = 'MPC';
+//window.mode = 'BOLA';
 // window.mode1 = [1, 2, 4]; // 1表示输出预测下载时间和实际下载时间,2表示输出平均误差,3表示输出第50号块的误差,4表示输出buffer
-window.mode1 = [4];
+window.mode1 = [1, 2];
 window.bandwidth_xquic = 1985;
 window.loss_xquic = 0;
 window.rtt_xquic = 0;
@@ -2387,6 +2387,17 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                         var requestWindow = requests.filter(function (req) {
                             return req.responsecode >= 200 && req.responsecode < 300 && req.type === 'MediaSegment' && req._stream === type && !!req._mediaduration;
                         });
+                        console.table(requestWindow.map(function (req) {
+                            var match = req.url.match(/v\d+_\d+-\d+-i-(\d+)\.m4s/);
+                            var value = match ? parseInt(match[1], 10) : null;
+                            return [
+                                req.trequest.getTime(), 
+                                req.tresponse.getTime(), 
+                                req._tfinish.getTime(), 
+                                value
+                            ];
+                        }));
+                        
                 
                         if (requestWindow.length > 0) {
                             var downloadTimeMeasured = requestWindow.map(function (req) {
@@ -2394,6 +2405,13 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                                 var value = match ? parseInt(match[1], 10) : null;
                                 return [Math.abs(req._tfinish.getTime() - req.trequest.getTime()), req._quality, value];
                             });
+
+                            // var bw = requestWindow.map(function (req) {
+                            //     var downloadBytes = req.trace.reduce((a, b) => a + b.b[0], 0);
+                            //     return  downloadBytes / Math.abs(req._tfinish.getTime() - req.trequest.getTime());
+                            // });
+
+                            // console.log('bw', bw);
 
                             const downloadTimeError = [];
                             var i = 0, j = 0;
@@ -2417,13 +2435,13 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                             }
 
                             if (window.mode1.includes(1)) {
-                                console.log('downloadTimePredict', window.downloadTimePredict);
-                                console.log('downloadTimeMeasured', downloadTimeMeasured);
+                                console.table('downloadTimePredict', window.downloadTimePredict);
+                                console.table('downloadTimeMeasured', downloadTimeMeasured);
                             }
                             if (window.mode1.includes(2)) {
                                 let averageError1 = downloadTimeError.reduce((aver, error) => aver + error[0], 0) / downloadTimeError.length;
                                 let averageError1Ave = downloadTimeError.reduce((aver, error) => aver + error[0] * error[1], 0) / downloadTimeError.length;
-                                console.log("Errors:", downloadTimeError);
+                                console.table("Errors:", downloadTimeError);
                                 console.log("Average Error1:", averageError1);
                                 console.log("Average Error1Ave:", averageError1Ave);
                             }
@@ -2439,7 +2457,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                                 if (window.buffer.length < 120) {
                                     window.buffer.push(bufferLevel);
                                 }
-                                console.log(window.buffer);
+                                console.table(window.buffer);
                             }
                         }
                     }

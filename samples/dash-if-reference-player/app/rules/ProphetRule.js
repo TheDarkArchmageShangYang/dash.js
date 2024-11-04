@@ -87,6 +87,9 @@ function ProphetRuleClass() {
     const setBitrates = [1,3,4,5,6];
     // const setBitrates = [0,1,2,3,4];
 
+    let bandwidth_MPC = [];
+    let bandwidth_comp = [];
+    
     let chunkNumber = 1;
 
     function setup() {
@@ -203,11 +206,13 @@ function ProphetRuleClass() {
         let time = 0;
         let downloadTime1 = RTT;
         let downloadTime2 = (chunkSize * 8 - bandwidth * RTT) / bandwidth / (1 - loss);
+        // let downloadTime2 = (chunkSize * 8 - bandwidth * RTT) / bandwidth;
         let downloadTime3 = calculateTailRetransmitTime(bandwidth, loss, RTT, PTO, RTO, chunkSize);
+        let threshold = chunkSize - bandwidth * RTT / 8;
 
         time += downloadTime1 + downloadTime2 + downloadTime3;
 
-        return [downloadTime1, downloadTime2, downloadTime3, time];
+        return [downloadTime1, downloadTime2, downloadTime3, time, threshold];
     }
 
     function getMaxIndex(rulesContext) {
@@ -237,6 +242,7 @@ function ProphetRuleClass() {
 
         const bufferLevel = dashMetrics.getCurrentBufferLevel(mediaType) * 1000;
         const throughput = throughputHistory.getAverageThroughput(mediaType, isDynamic);
+        bandwidth_MPC.push(throughput);
         const safeThroughput = throughputHistory.getSafeAverageThroughput(mediaType, isDynamic);
         const latency = throughputHistory.getAverageLatency(mediaType);
         let quality;
@@ -251,8 +257,8 @@ function ProphetRuleClass() {
             bitrateSum,
             smoothnessDiffs,
             downloadTime,
-            downloadTimeForFirstChunk,
-            downloadTimeSelected,
+            downloadTimeForFirstChunk = [],
+            downloadTimeSelected = [],
             lastBitrate;
 
         if (isNaN(throughput)) {
@@ -288,10 +294,19 @@ function ProphetRuleClass() {
             case TEST_STATE_STEADY:
                 // console.log("TEST_STATE_STEADY");
                 // const startTime1 = performance.now();
+                let lastFiveThroughput = bandwidth_MPC.slice(-5);
+                let harmonicBandwidth = lastFiveThroughput.length / lastFiveThroughput.reduce((acc, val) => acc + (1 / val), 0);
+                console.log(harmonicBandwidth);
+                bandwidth_comp.push([window.bandwidth_xquic.toFixed(3), window.loss_xquic.toFixed(3), window.rtt_xquic.toFixed(3), harmonicBandwidth.toFixed(3), throughput.toFixed(3)]);
+                let table = bandwidth_comp.map((item, index) => {
+                    return [index + 6, ...item];
+                })
+                console.table(table);
                 // if (chunkNumber != 50) {
                 let downloadTime1 = 0;
                 let downloadTime2 = 0;
                 let downloadTime3 = 0;
+                let threshold = 0;
                 for (let bitrateSequence of TestState.chunkBitrateSequenceOptions) {
                     // const startTime2 = performance.now();
                     let newBufferLevel = bufferLevel;
@@ -304,14 +319,14 @@ function ProphetRuleClass() {
 
                     for (let i = 0; i < horizon; i++) {
                         let bitrate = bitrateSequence[i];
-                        [downloadTime1, downloadTime2, downloadTime3, downloadTime] = calculateDownloadTimeFromParameter(window.bandwidth_xquic, 
+                        [downloadTime1, downloadTime2, downloadTime3, downloadTime, threshold] = calculateDownloadTimeFromParameter(window.bandwidth_xquic, 
                                                                         window.loss_xquic, 
                                                                         window.rtt_xquic, 
                                                                         window.pto_xquic, 
                                                                         window.rto_xquic, 
                                                                         videoChunkSize[bitrate][chunkNumber-1]);
                         if (i == 0) {
-                            downloadTimeForFirstChunk = downloadTime;
+                            downloadTimeForFirstChunk = [downloadTime1, downloadTime2, downloadTime3, downloadTime, threshold];
                         }
                         downloadTime *= 1 + videoChunkSize[9][chunkNumber-1] / videoChunkSize[bitrate][chunkNumber-1];
                         if (downloadTime > newBufferLevel) {
@@ -356,9 +371,9 @@ function ProphetRuleClass() {
 
                 //     console.log('for the 50th chunk, select quality 4');
                 // }
-                console.log('downloadTime1:', downloadTime1, 'downloadTime2:', downloadTime2, 'downloadTime3:', downloadTime3, 'bitrate:', bitrateSequenceSelected[0], 'chunkNumber:', chunkNumber);
-                window.downloadTimePredict.splice(window.downloadTimePredict.length, 0, [downloadTimeSelected, bitrateSequenceSelected[0], chunkNumber]);
-                console.log(downloadTimeSelected, bitrateSequenceSelected[0], chunkNumber);
+                console.log('视频块', chunkNumber, '第1阶段:', downloadTimeSelected[0], '第2阶段:', downloadTimeSelected[1], '第3阶段:', downloadTimeSelected[2], '总时间:', downloadTimeSelected[3], '第2阶段和第3阶段边界:', downloadTimeSelected[4]);
+                window.downloadTimePredict.splice(window.downloadTimePredict.length, 0, [downloadTimeSelected[3], bitrateSequenceSelected[0], chunkNumber]);
+                console.log(downloadTimeSelected[3], bitrateSequenceSelected[0], chunkNumber);
                 // const endTime1 = performance.now();
                 // const executionTime1 = endTime1 - startTime1;
                 // console.log('代码总运行时间：', executionTime1, '毫秒');

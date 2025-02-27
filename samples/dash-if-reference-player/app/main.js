@@ -2,8 +2,8 @@
 
 var app = angular.module('DashPlayer', ['DashSourcesService', 'DashContributorsService', 'DashIFTestVectorsService', 'angular-flot']); /* jshint ignore:line */
 
-//window.mode = 'Prophet';
-window.mode = 'MPC';
+window.mode = 'Prophet';
+//window.mode = 'MPC';
 //window.mode = 'BOLA';
 // window.mode1 = [1, 2, 4]; // 1表示输出预测下载时间和实际下载时间,2表示输出平均误差,3表示输出第50号块的误差,4表示输出buffer
 window.mode1 = [1, 2];
@@ -153,6 +153,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             buffer: { data: [], selected: false, color: '#65080c', label: 'Audio Buffer Level' },
             bitrate: { data: [], selected: false, color: '#00CCBE', label: 'Audio Bitrate (kbps)' },
             rebufferTime: { data: [], selected: false, color: '#326e88', label: 'Rebuffer Time (ms)' },
+            rebufferPercent: { data: [], selected: false, color: '#326e88', label: 'Rebuffer Percent (%)' },
             averageBitrate: { data: [], selected: false, color: '#00CCBE', label: 'Average Bitrate (kbps)' },
             index: { data: [], selected: false, color: '#ffd446', label: 'Audio Current Index' },
             pendingIndex: { data: [], selected: false, color: '#FF6700', label: 'AudioPending Index' },
@@ -167,10 +168,11 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             playbackRate: { data: [], selected: false, color: '#65080c', label: 'Playback Rate' }
         },
         video: {
-            buffer: { data: [], selected: true, color: '#00589d', label: '缓存时长(ms)' },
-            bitrate: { data: [], selected: true, color: '#ff0000', label: '单个视频块清晰度 (kbps)' },
-            rebufferTime: { data: [], selected: false, color: '#326e88', label: '卡顿时间 (s)' },
-            averageBitrate: { data: [], selected: false, color: '#00CCBE', label: 'Average Bitrate (kbps)' },
+            buffer: { data: [], selected: false, color: '#00589d', label: '缓存时长(ms)' },
+            bitrate: { data: [], selected: true, color: '#ff0000', label: '实时清晰度 (kbps)' },
+            rebufferTime: { data: [], selected: false, color: '#326e88', label: '卡顿时间 (ms)' },
+            rebufferPercent: { data: [], selected: false, color: '#326e88', label: '平均卡顿率 (%)' },
+            averageBitrate: { data: [], selected: false, color: '#00CCBE', label: '平均清晰度 (kbps)' },
             index: { data: [], selected: false, color: '#326e88', label: 'Video Current Quality' },
             pendingIndex: { data: [], selected: false, color: '#44c248', label: 'Video Pending Index' },
             ratio: { data: [], selected: false, color: '#00CCBE', label: 'Video Ratio' },
@@ -178,7 +180,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             latency: { data: [], selected: false, color: '#329d61', label: 'Video Latency (ms)' },
             droppedFPS: { data: [], selected: false, color: '#65080c', label: 'Video Dropped FPS' },
             mtp: { data: [], selected: false, color: '#FFC400', label: '带宽估计(应用层) (kbps)' },
-            mtpFromXquic: { data: [], selected: true, color: '#46a3ff', label: '带宽估计 (kbps)' },
+            mtpFromXquic: { data: [], selected: true, color: '#46a3ff', label: '带宽估计(传输层) (kbps)' },
             etp: { data: [], selected: false, color: '#1712B3', label: 'Estimated throughput (kbps)' },
             liveLatency: { data: [], selected: false, color: '#65080c', label: 'Live Latency' },
             playbackRate: { data: [], selected: false, color: '#65080c', label: 'Playback Rate' }
@@ -280,6 +282,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     // metrics
     $scope.videoBitrate = 0;
     $scope.videoRebufferTime = 0;
+    $scope.videoRebufferPercent = 0;
     $scope.videoAverageBitrate = 0;
     $scope.videoIndex = 0;
     $scope.videoPendingIndex = 0;
@@ -364,6 +367,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
     $scope.castPlayerState = 'IDLE';
 
     $scope.rebufferTime = 0;
+    $scope.rebufferPercent = 0;
     $scope.lastBufferEmpty = false;
     $scope.lastBufferEmptyTime = 0;
     $scope.qualitySum = 0;
@@ -2336,7 +2340,17 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                 playbackRate = parseFloat($scope.player.getPlaybackRate().toFixed(2));
             }
 
+            const timeText = document.getElementById("videoTime").textContent;
+            const [minutes, seconds] = timeText.split(":").map(Number);
+            const totalSeconds = minutes * 60 + seconds;
+            if ($scope.rebufferTime === 0 && totalSeconds === 0) {
+                $scope.rebufferPercent = 0;
+            } else {
+                $scope.rebufferPercent = $scope.rebufferTime / 1000 / ($scope.rebufferTime / 1000 + totalSeconds) * 100;
+            }
+            console.log(timeText, totalSeconds, $scope.rebufferPercent);
             $scope[type + 'RebufferTime'] = $scope.rebufferTime;
+            $scope[type + 'RebufferPercent'] = $scope.rebufferPercent;
             $scope[type + 'AverageBitrate'] = $scope.averageBitrate;
             $scope[type + 'BufferLength'] = bufferLevel * 1000; //s->ms
             $scope[type + 'MaxIndex'] = maxIndex;
@@ -2361,6 +2375,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                 $scope.plotPoint('buffer', type, bufferLevel, time);
                 $scope.plotPoint('index', type, index, time);
                 $scope.plotPoint('rebufferTime', type, $scope.rebufferTime, time);
+                $scope.plotPoint('rebufferPercent', type, $scope.rebufferPercent, time);
                 $scope.plotPoint('averageBitrate', type, $scope.averageBitrate, time);
                 $scope.plotPoint('bitrate', type, bitrate, time);
                 $scope.plotPoint('droppedFPS', type, droppedFPS, time);

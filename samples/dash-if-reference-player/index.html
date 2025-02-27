@@ -913,7 +913,7 @@
     <div class="row">
         <div class="dash-video-player col-md-9">
             <div id="videoContainer" class="videoContainer">
-                <video></video>
+                <video id="videoPlayer"></video>
                 <div id="video-caption"></div>
                 <div id="cast-msg" ng-if="isCasting">
                     {{ castPlayerState === 'IDLE' ? 'Ready to cast stream' : castPlayerState }}
@@ -983,21 +983,21 @@
                     <div class="tab-pane fade active in" id="videoStatsTab">
                         <div class="panel-body panel-stats" ng-cloak>
                             <!-- VIDEO STATS ITEMS-->
-                            <div class="text-success">
+                            <!-- <div class="text-success">
                                 <input id="videoBufferCB" type="checkbox" ng-model="chartState.video.buffer.selected"
                                        ng-change="enableChartByName('buffer', 'video')" class="checkbox-large">
                                 <label class="text-primary" for="videoBufferCB" data-toggle="tooltip"
                                        data-placement="top"
                                        title="The length of the forward buffer, in seconds" style="font-size: 24px;">缓存时长
                                     :</label> <span style="font-size: 24px;">{{videoBufferLength}} ms</span>
-                            </div>
+                            </div> -->
 
                             <div class="text-success">
                                 <input id="videoBitrateCB" type="checkbox" ng-model="chartState.video.bitrate.selected"
                                        ng-change="enableChartByName('bitrate', 'video')" class="checkbox-large">
                                 <label class="text-primary" for="videoBitrateCB" data-toggle="tooltip"
                                        data-placement="top"
-                                       title="The bitrate of the representation being downloaded" style="font-size: 24px;">单个视频块清晰度
+                                       title="The bitrate of the representation being downloaded" style="font-size: 24px;">实时清晰度
                                     :</label> <span style="font-size: 24px;">{{videoBitrate | number:0}} kbps</span>
                             </div>
 
@@ -1006,7 +1006,7 @@
                                        ng-change="enableChartByName('averageBitrate', 'video')" class="checkbox-large">
                                 <label class="text-primary" for="averageVideoBitrateCB" data-toggle="tooltip"
                                        data-placement="top"
-                                       title="The average bitrate of the representation downloaded" style="font-size: 24px;">视频平均清晰度
+                                       title="The average bitrate of the representation downloaded" style="font-size: 24px;">平均清晰度
                                     :</label> <span style="font-size: 24px;">{{videoAverageBitrate | number:0}} kbps</span>
                             </div>
 
@@ -1016,7 +1016,16 @@
                                 <label class="text-primary" for="videoRebufferTimeCB" data-toggle="tooltip"
                                        data-placement="top"
                                        title="The total rebuffer time of the video" style="font-size: 24px;">卡顿时间
-                                    :</label> <span style="font-size: 24px;">{{videoRebufferTime | number:2}} ms</span>
+                                    :</label> <span style="font-size: 24px;">{{videoRebufferTime | number:0}} ms</span>
+                            </div>
+
+                            <div class="text-success">
+                                <input id="videoRebufferPercentCB" type="checkbox" ng-model="chartState.video.rebufferPercent.selected"
+                                       ng-change="enableChartByName('rebufferPercent', 'video')" class="checkbox-large">
+                                <label class="text-primary" for="videoRebufferPercentCB" data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="The total rebuffer Percent of the video" style="font-size: 24px;">平均卡顿率
+                                    :</label> <span style="font-size: 24px;">{{videoRebufferPercent | number:2}} %</span>
                             </div>
 
                             <!-- <div class="text-success">

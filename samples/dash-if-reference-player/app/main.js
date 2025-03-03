@@ -156,10 +156,10 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
         },
         video: {
             buffer: { data: [], selected: false, color: '#00589d', label: '缓存时长(ms)' },
-            bitrate: { data: [], selected: true, color: '#ff0000', label: '实时清晰度 (kbps)' },
+            bitrate: { data: [], selected: false, color: '#ff0000', label: '实时清晰度 (kbps)' },
             rebufferTime: { data: [], selected: false, color: '#326e88', label: '卡顿时间 (s)' },
             rebufferPercent: { data: [], selected: false, color: '#326e88', label: '平均卡顿率 (%)' },
-            averageBitrate: { data: [], selected: false, color: '#00CCBE', label: '平均清晰度 (kbps)' },
+            averageBitrate: { data: [], selected: true, color: '#00CCBE', label: '平均清晰度 (kbps)' },
             index: { data: [], selected: false, color: '#326e88', label: 'Video Current Quality' },
             pendingIndex: { data: [], selected: false, color: '#44c248', label: 'Video Pending Index' },
             ratio: { data: [], selected: false, color: '#00CCBE', label: 'Video Ratio' },
@@ -2139,6 +2139,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             var mtp = $scope.player.getAverageThroughput(type);
             if ($scope.isDynamic) {
                 liveLatency = $scope.player.getCurrentLiveLatency();
+                
                 playbackRate = parseFloat($scope.player.getPlaybackRate().toFixed(2));
             }
 

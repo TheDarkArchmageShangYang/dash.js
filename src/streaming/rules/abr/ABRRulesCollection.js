@@ -178,16 +178,7 @@ function ABRRulesCollection(config) {
                 //     values[req.priority].reason = req.reason || null;
                 // }
                 if (values[req.priority].quality === SwitchRequest.NO_CHANGE || values[req.priority].quality > req.quality) {
-                    const setBitrates = [1,3,4,5,6];
-                    values[req.priority].quality = setBitrates[0];
-                    for (let value of setBitrates) {
-                        if (value <= req.quality) {
-                            values[req.priority].quality = value;
-                        }
-                        else {
-                            break;
-                        }
-                    }
+                    values[req.priority].quality = req.quality;
                     values[req.priority].reason = req.reason || null;
                 }
             }

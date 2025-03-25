@@ -21,6 +21,7 @@ build/es5
 build/typings
 coverage
 video
+newVideo
 
 #################
 ## Eclipse

@@ -49,7 +49,7 @@ angular.module('DashIFTestVectorsService', ['ngResource']).factory('dashifTestVe
 
 app.controller('DashController', ['$scope', '$window', 'sources', 'contributors', 'dashifTestVectors', function ($scope, $window, sources, contributors, dashifTestVectors) {
     $scope.selectedItem = {
-        url: 'https://udpcc-shh.dfshan.net:8000/video/manifest.mpd'
+        url: 'https://udpcc-shh3.dfshan.net:8000/newVideo/manifest.mpd'
         // url: 'https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd'
     };
 
@@ -574,20 +574,12 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             // console.log('qualitySum',$scope.qualitySum,'index',e.request.index,'averageBitrate',$scope.averageBitrate);
             $scope.smoothness += Math.abs(quality - $scope.lastQuality);
             $scope.lastQuality = quality;
-            console.log('new chunk quality:', quality+'('+e.request.quality+')', 'qualitySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness, 'rebufferTime', $scope.rebufferTime);
+            // console.log('new chunk quality:', quality+'('+e.request.quality+')', 'qualitySum:', $scope.qualitySum, 'smoothmess:', $scope.smoothness, 'rebufferTime', $scope.rebufferTime);
             // console.log('bufferLevel',bufferLevel);
             // let requests = dashMetrics.getHttpRequests(e.request.mediaType);
             // let currentRequest = requests[requests.length - 1];
             // console.log('time1:', currentRequest.tresponse.getTime() - currentRequest.trequest.getTime(), 'time2:', currentRequest._tfinish.getTime() - currentRequest.tresponse.getTime());
-            console.log('QoE:', $scope.qualitySum - $scope.smoothness - 3 * $scope.rebufferTime);
-        }
-        const now = new Date();
-        const hours = now.getHours();    // 获取小时
-        const minutes = now.getMinutes();  // 获取分钟
-        const seconds = now.getSeconds();  // 获取秒
-        const milliseconds = now.getMilliseconds(); // 获取毫秒
-        if (e.request.index >= 0) {
-            console.log('receive', e.request.mediaType, 'chunk', e.request.index + 1, `at 当前时间: ${hours} 时 ${minutes} 分 ${seconds} 秒 ${milliseconds} 毫秒`)
+            // console.log('QoE:', $scope.qualitySum - $scope.smoothness - 3 * $scope.rebufferTime);
         }
     }, $scope);
 
@@ -1091,7 +1083,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
 
     $scope.updateMetricsFromXquic = function () {
         // 将 ws:// 替换为 wss:// 以使用安全的 WebSocket 连接
-        const ws = new WebSocket('wss://udpcc-shh.dfshan.net:8001');
+        const ws = new WebSocket('wss://udpcc-shh3.dfshan.net:8001');
     
         ws.onmessage = (event) => {
             const now = new Date();
@@ -2348,7 +2340,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
             } else {
                 $scope.rebufferPercent = $scope.rebufferTime / 1000 / ($scope.rebufferTime / 1000 + totalSeconds) * 100;
             }
-            console.log(timeText, totalSeconds, $scope.rebufferPercent);
+            // console.log(timeText, totalSeconds, $scope.rebufferPercent);
             $scope[type + 'RebufferTime'] = $scope.rebufferTime;
             $scope[type + 'RebufferPercent'] = $scope.rebufferPercent;
             $scope[type + 'AverageBitrate'] = $scope.averageBitrate;
@@ -2402,16 +2394,16 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                         var requestWindow = requests.filter(function (req) {
                             return req.responsecode >= 200 && req.responsecode < 300 && req.type === 'MediaSegment' && req._stream === type && !!req._mediaduration;
                         });
-                        console.table(requestWindow.map(function (req) {
-                            var match = req.url.match(/v\d+_\d+-\d+-i-(\d+)\.m4s/);
-                            var value = match ? parseInt(match[1], 10) : null;
-                            return [
-                                req.trequest.getTime(), 
-                                req.tresponse.getTime(), 
-                                req._tfinish.getTime(), 
-                                value
-                            ];
-                        }));
+                        // console.table(requestWindow.map(function (req) {
+                        //     var match = req.url.match(/v\d+_\d+-\d+-i-(\d+)\.m4s/);
+                        //     var value = match ? parseInt(match[1], 10) : null;
+                        //     return [
+                        //         req.trequest.getTime(), 
+                        //         req.tresponse.getTime(), 
+                        //         req._tfinish.getTime(), 
+                        //         value
+                        //     ];
+                        // }));
                         
                 
                         if (requestWindow.length > 0) {
@@ -2449,31 +2441,31 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                                 }
                             }
 
-                            if (window.mode1.includes(1)) {
-                                console.table('downloadTimePredict', window.downloadTimePredict);
-                                console.table('downloadTimeMeasured', downloadTimeMeasured);
-                            }
-                            if (window.mode1.includes(2)) {
-                                let averageError1 = downloadTimeError.reduce((aver, error) => aver + error[0], 0) / downloadTimeError.length;
-                                let averageError1Ave = downloadTimeError.reduce((aver, error) => aver + error[0] * error[1], 0) / downloadTimeError.length;
-                                console.table("Errors:", downloadTimeError);
-                                console.log("Average Error1:", averageError1);
-                                console.log("Average Error1Ave:", averageError1Ave);
-                            }
-                            if (window.mode1.includes(3)) {
-                                const filteredArray1 = window.downloadTimePredict.filter(item => item[2] === 50);
-                                const filteredArray2 = downloadTimeMeasured.filter(item => item[2] === 50);
-                                const filteredArray3 = downloadTimeError.filter(item => item[2] === 50);
-                                if (filteredArray1.length > 0 && filteredArray2.length > 0) {
-                                    console.log('50号视频块:预测下载时间:', filteredArray1[0], '实际下载时间:', filteredArray2[0], '误差:', filteredArray3[0]);
-                                }
-                            }
-                            if (window.mode1.includes(4)) {
-                                if (window.buffer.length < 120) {
-                                    window.buffer.push(bufferLevel);
-                                }
-                                console.table(window.buffer);
-                            }
+                            // if (window.mode1.includes(1)) {
+                            //     console.table('downloadTimePredict', window.downloadTimePredict);
+                            //     console.table('downloadTimeMeasured', downloadTimeMeasured);
+                            // }
+                            // if (window.mode1.includes(2)) {
+                            //     let averageError1 = downloadTimeError.reduce((aver, error) => aver + error[0], 0) / downloadTimeError.length;
+                            //     let averageError1Ave = downloadTimeError.reduce((aver, error) => aver + error[0] * error[1], 0) / downloadTimeError.length;
+                            //     console.table("Errors:", downloadTimeError);
+                            //     console.log("Average Error1:", averageError1);
+                            //     console.log("Average Error1Ave:", averageError1Ave);
+                            // }
+                            // if (window.mode1.includes(3)) {
+                            //     const filteredArray1 = window.downloadTimePredict.filter(item => item[2] === 50);
+                            //     const filteredArray2 = downloadTimeMeasured.filter(item => item[2] === 50);
+                            //     const filteredArray3 = downloadTimeError.filter(item => item[2] === 50);
+                            //     if (filteredArray1.length > 0 && filteredArray2.length > 0) {
+                            //         console.log('50号视频块:预测下载时间:', filteredArray1[0], '实际下载时间:', filteredArray2[0], '误差:', filteredArray3[0]);
+                            //     }
+                            // }
+                            // if (window.mode1.includes(4)) {
+                            //     if (window.buffer.length < 120) {
+                            //         window.buffer.push(bufferLevel);
+                            //     }
+                            //     console.table(window.buffer);
+                            // }
                         }
                     }
                 }
@@ -2734,7 +2726,7 @@ app.controller('DashController', ['$scope', '$window', 'sources', 'contributors'
                     'streaming': {
                         'abr': {
                             'initialBitrate': {
-                                'video': 1200
+                                'video': 1210
                             }
                         }
                     }

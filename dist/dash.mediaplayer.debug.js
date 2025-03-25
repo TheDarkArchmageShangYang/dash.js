@@ -16863,8 +16863,8 @@ function MediaPlayer() {
   var instance, logger, source, protectionData, mediaPlayerInitialized, streamingInitialized, playbackInitialized, autoPlay, providedStartTime, abrController, schemeLoaderFactory, timelineConverter, mediaController, protectionController, metricsReportingController, mssHandler, offlineController, adapter, mediaPlayerModel, customParametersModel, errHandler, baseURLController, capabilities, capabilitiesFilter, streamController, textController, gapController, playbackController, serviceDescriptionController, contentSteeringController, catchupController, dashMetrics, manifestModel, cmcdModel, cmsdModel, videoModel, uriFragmentModel, domStorage, segmentBaseController;
   /*
   ---------------------------------------------------------------------------
-       INIT FUNCTIONS
-   ---------------------------------------------------------------------------
+        INIT FUNCTIONS
+    ---------------------------------------------------------------------------
   */
 
   function setup() {
@@ -17246,8 +17246,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       PLAYBACK FUNCTIONS
-   ---------------------------------------------------------------------------
+        PLAYBACK FUNCTIONS
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -17697,8 +17697,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       AUTO BITRATE
-   ---------------------------------------------------------------------------
+        AUTO BITRATE
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -17808,8 +17808,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       MEDIA PLAYER CONFIGURATION
-   ---------------------------------------------------------------------------
+        MEDIA PLAYER CONFIGURATION
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -18034,8 +18034,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       OFFLINE
-   ---------------------------------------------------------------------------
+        OFFLINE
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -18050,8 +18050,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       METRICS
-   ---------------------------------------------------------------------------
+        METRICS
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -18070,8 +18070,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       TEXT MANAGEMENT
-   ---------------------------------------------------------------------------
+        TEXT MANAGEMENT
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -18168,8 +18168,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       VIDEO ELEMENT MANAGEMENT
-   ---------------------------------------------------------------------------
+        VIDEO ELEMENT MANAGEMENT
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -18262,8 +18262,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       STREAM AND TRACK MANAGEMENT
-   ---------------------------------------------------------------------------
+        STREAM AND TRACK MANAGEMENT
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -18430,8 +18430,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       Custom filter and callback functions
-   ---------------------------------------------------------------------------
+        Custom filter and callback functions
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -18525,8 +18525,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       PROTECTION MANAGEMENT
-   ---------------------------------------------------------------------------
+        PROTECTION MANAGEMENT
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -18572,8 +18572,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       THUMBNAILS MANAGEMENT
-   ---------------------------------------------------------------------------
+        THUMBNAILS MANAGEMENT
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -18615,8 +18615,8 @@ function MediaPlayer() {
   }
   /*
   ---------------------------------------------------------------------------
-       TOOLS AND OTHERS FUNCTIONS
-   ---------------------------------------------------------------------------
+        TOOLS AND OTHERS FUNCTIONS
+    ---------------------------------------------------------------------------
   */
 
   /**
@@ -39226,19 +39226,7 @@ function ABRRulesCollection(config) {
         //     values[req.priority].reason = req.reason || null;
         // }
         if (values[req.priority].quality === _SwitchRequest__WEBPACK_IMPORTED_MODULE_2__["default"].NO_CHANGE || values[req.priority].quality > req.quality) {
-          var setBitrates = [1, 3, 4, 5, 6];
-          values[req.priority].quality = setBitrates[0];
-
-          for (var _i = 0, _setBitrates = setBitrates; _i < _setBitrates.length; _i++) {
-            var value = _setBitrates[_i];
-
-            if (value <= req.quality) {
-              values[req.priority].quality = value;
-            } else {
-              break;
-            }
-          }
-
+          values[req.priority].quality = req.quality;
           values[req.priority].reason = req.reason || null;
         }
       }
@@ -47426,7 +47414,7 @@ function DOMStorage(config) {
     }
     /* When Safari (OS X or iOS) is in private browsing mode, it appears as though localStorage is available, but trying to call setItem throws an exception.
      http://stackoverflow.com/questions/14555347/html5-localstorage-error-with-safari-quota-exceeded-err-dom-exception-22-an
-      Check if the storage can be used
+       Check if the storage can be used
      */
 
 
